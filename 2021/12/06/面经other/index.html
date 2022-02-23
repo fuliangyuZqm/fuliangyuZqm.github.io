@@ -1,0 +1,2161 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="面经other, fuliangyu">
+    <meta name="description" content="sparkSpark join的分类，实现过程，得到的结果，什么情况下的join为窄依赖
+https://www.cnblogs.com/duodushuduokanbao/p/9911256.html
+https://blog.csdn.">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>面经other | fuliangyu</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/css/main.css"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">fuliangyu</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/gallery" class="waves-effect waves-light">
+      
+      <i class="fas fa-image" style="zoom: 0.6;"></i>
+      
+      <span>相册</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">fuliangyu</div>
+        <div class="logo-desc">
+            
+            blog
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/gallery" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-image"></i>
+			
+			相册
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/11.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">面经other</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E9%9D%A2%E7%BB%8F/">
+                                <span class="chip bg-color">面经</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91/">
+                                <span class="chip bg-color">大数据开发</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E9%9D%A2%E7%BB%8F/" class="post-category">
+                                面经
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2021-12-06
+                </div>
+                
+
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2022-02-23
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    10.4k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    38 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="spark"><a href="#spark" class="headerlink" title="spark"></a>spark</h2><p>Spark join的分类，实现过程，得到的结果，什么情况下的join为窄依赖</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/duodushuduokanbao/p/9911256.html">https://www.cnblogs.com/duodushuduokanbao/p/9911256.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Lu_Xiao_Yue/article/details/83926650">https://blog.csdn.net/Lu_Xiao_Yue/article/details/83926650</a></p>
+<blockquote>
+<p>Broadcast Hash Join：适合一张很小的表和一张大表进行Join — 宽依赖（大表与小表join）</p>
+<p><strong>Sort Merge Join</strong>：两张大表进行join</p>
+<p>Spark中产生宽窄依赖的依据是shuffle，当发生shuffle时，会产生宽依赖，基本上shuffle算子都会产生宽依赖，</p>
+<p>在执行join算子之前如果先执行groupByKey，执行groupByKey之后，会把相同的key分到同一个分区，再执行join算子，join算子是把key相同的进行join（只是对于k v形式的数据可以使用），不一定会产生shuffle ，有可能发生shuffle，也有可能不发生</p>
+</blockquote>
+<p>Spark map join的实现原理</p>
+<blockquote>
+<p>通过广播将小数据集发送到不同的executor中，需要的task会去读取，避免了大数据的IO和可能的数据倾斜，如果不广播，每个task都会从driver端复制一份数据，这样executor端可能会出现OOM</p>
+</blockquote>
+<p>Spark Shuffle过程</p>
+<blockquote>
+<p>见spark.md</p>
+</blockquote>
+<p>Spark Task失败要从头开始重试吗</p>
+<blockquote>
+<p>当执行中途失败时，MapReduce会从失败处继续执行，因为它是依赖于硬盘驱动器的，但是Spark就必须从头开始执行，这样MapReduce相对节省了时间</p>
+</blockquote>
+<p>spark提交job流程/任务调度</p>
+<blockquote>
+<p>见spark.md</p>
+</blockquote>
+<p>SparkStreaming和Flink的区别？</p>
+<blockquote>
+<p>sparkStreaming是微批处理</p>
+<p>flink是事件触发的流处理</p>
+</blockquote>
+<p>Scala的模式匹配和Java有什么区别</p>
+<blockquote>
+</blockquote>
+<p>数据倾斜</p>
+<blockquote>
+<p>见spark.md</p>
+</blockquote>
+<p>spark的stage如何划分，在源码中是怎样判断属于shuffleMapStage或resultStage的？</p>
+<blockquote>
+<p>根据rdd的依赖类型划分，遇到窄依赖就划分一次stage，从job的action算子开始向上遍历，遇到窄依赖就划分一个stage，从action算子开始，到窄依赖直接的最后一个stage是resultStage，其余dag图中的stage是shuffleMapStage</p>
+</blockquote>
+<p>join的时候，会调用什么算法进行shuffle？</p>
+<blockquote>
+<p><strong>Sort Merge Join：适合两张大表进行Join；</strong></p>
+<p>Hash Shuffle Join</p>
+</blockquote>
+<p>spark的RDD是什么？有什么特点？弹性体现在什么地方？spark怎么把你的算子转化成rdd的？rdd之间的一些关系。rdd怎么提交到内存上计算的</p>
+<blockquote>
+<p>分布式弹性数据集，弹性体现在，如果spark的storge内存不够，rdd会暂时缓存到磁盘中，等需要的时候再读出来</p>
+</blockquote>
+<p>宽依赖窄依赖有什么区别？划分stage的过程除了宽窄依赖还有什么判断标准？<strong>为什么要根据宽依赖划分stage</strong></p>
+<blockquote>
+<p>宽依赖是一个RDD中的一个Partition被多个子Partition所依赖（一个父亲多有儿子），也就是说每一个父RDD的Partition中的数据，都可能传输一部分到下一个RDD的多个partition中，此时一定会发生shuffle</p>
+<p>窄依赖： 一个RDD中的一个 Partition最多被一个子Partition所依赖（一个父亲有一个儿子）</p>
+<p>只有上一个stage的所有数据都准备好了，下一个stage才能开始计算，所以我们要确保一个rdd内部的所有分区都就绪，这样就需要按照rdd之间的依赖关系划分</p>
+</blockquote>
+<p>cache和persist的区别？是transformaiton算子还是action算子？</p>
+<blockquote>
+<p>cache只有一个默认的缓存级别MEMORY_ONLY ，而persist可以根据情况设置其它的缓存级别</p>
+<p>通过源码可以看出cache()是persist()的简化方式，调用persist的无参版本，也就是调用persist(StorageLevel.MEMORY_ONLY)，cache只有一个默认的缓存级别MEMORY_ONLY，即将数据持久化到内存中，而persist可以通过传递一个 StorageLevel 对象来设置缓存的存储级别</p>
+<p><strong>在 shuffle 操作中（例如 reduceByKey），即便是用户没有调用 persist 方法，Spark 也会自动缓存部分中间数据。这么做的目的是，在 shuffle 的过程中某个节点运行失败时，不需要重新计算所有的输入数据。如果用户想多次使用某个 RDD，强烈推荐在该 RDD 上调用 persist 方法</strong></p>
+<p><strong>默认情况下RDD的transformation是lazy形式，实际计算只有在ation时才会进行，而且rdd的计算结果默认都是临时的，用过即丢弃，每个action都会触发整个DAG的从头开始计算，因此在迭代计算时都会想到用cache或persist进结果进行缓存。敝人看到很多资料或书籍有的说是persist或cache会触发transformation真正执行计算，有的说是不会！敝人亲自实验了一把，最终确认cache或persist不会触发真正的计算，而是要等到第一个ation时才会真正执行计算并缓存结果。</strong></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaojianting/article/details/79358962">https://blog.csdn.net/zhaojianting/article/details/79358962</a></p>
+</blockquote>
+<p><strong>spark的内存模型是怎么样的？</strong></p>
+<blockquote>
+<p>见spark.md</p>
+</blockquote>
+<p>spark on yarn， Stand alone模式和yarn模式的区别？</p>
+<blockquote>
+<p>spark on yarn是客户端向yarn的jobManager提交任务，jobManager对任务所需要的资源进行分配</p>
+<p>spark standalone是客户端向master提交任务，master对资源进行管理划分</p>
+</blockquote>
+<p>spark相比mapreduce的优点</p>
+<blockquote>
+<p>mr：</p>
+<ul>
+<li><p>仅支持Map和Reduce两种操作</p>
+</li>
+<li><p>　　2）处理效率低效。</p>
+<p>  　　　　a）Map中间结果写磁盘，Reduce写HDFS，多个MR之间通过HDFS交换数据; 任务调度和启动开销大;</p>
+<pre><code>  　　　　b）无法充分利用内存
+  　　　　c）Map端和Reduce端均需要排序
+</code></pre>
+</li>
+<li><p>　　3）不适合迭代计算(如机器学习、图计算等)，交互式处理(数据挖掘) 和流式处理(点击日志分析)</p>
+</li>
+</ul>
+<p>spark：</p>
+<ul>
+<li><p>高效(比MapReduce快10~100倍)</p>
+<p>　　1）内存计算引擎，提供Cache机制来支持需要反复迭代计算或者多次数据共享，减少数据读取的IO开销<br>  　　2）DAG引擎，减少多次计算之间中间结果写到HDFS的开销<br>  　　3）使用多线程池模型来减少task启动开稍，shuffle过程中避免 不必要的sort操作以及减少磁盘IO操作</p>
+</li>
+<li><p>易用<br>　　1）提供了丰富的API，支持Java，Scala，Python和R四种语言<br>  　　2）代码量比MapReduce少2~5倍</p>
+</li>
+<li><p>丰富的API（Java、Scala、Python、R四种语言，sort、join等高效算子）</p>
+</li>
+<li><p>DAG执行引擎，中间结果不落盘</p>
+</li>
+<li><p>线程池模型减少task启动开销</p>
+</li>
+<li><p>充分利用内存，减少磁盘IO</p>
+</li>
+<li><p>避免不必要的排序操作</p>
+</li>
+<li><p>适合迭代计算，比如机器学习算法</p>
+</li>
+</ul>
+<p><strong>当执行中途失败时，MapReduce会从失败处继续执行，因为它是依赖于硬盘驱动器的，但是Spark就必须从头开始执行，这样MapReduce相对节省了时间</strong></p>
+</blockquote>
+<p>spark输出文件的个数，如何合并小文件</p>
+<blockquote>
+<p>减少分区数目，重分区，会导致排序数据再次乱序</p>
+<p>最后一个阶段增加一个shuffle操作，进行小文件合并</p>
+</blockquote>
+<p>SparkStreaming将日志怎么导入的hive并保存的</p>
+<p>Spark的特征</p>
+<p> Spark可以做实时计算吗</p>
+<blockquote>
+<p>sparkstreaming</p>
+</blockquote>
+<p>Spark做实时计算的过程中会出现什么问题(不确定答案)</p>
+<blockquote>
+</blockquote>
+<p>groupbykey、reducebykey</p>
+<blockquote>
+<p>reducebykey有map端的预聚合– 做局部的聚合，减少数据在网络节点之间的大量IO</p>
+<p>groupbykey是reduce端的聚合</p>
+<p>但是reduceByKey不一定比groupByKey快</p>
+</blockquote>
+<p>SQL join，union</p>
+<blockquote>
+</blockquote>
+<p>sparksql、dataframe、dataset、rdd</p>
+<blockquote>
+<p>RDD</p>
+<p>RDD<strong>的优点</strong>：<br>1.相比于传统的MapReduce框架，Spark在RDD中内置很多函数操作，group，map，filter等，方便处理结构化或非结构化数据。<br>2.面向对象编程，直接存储的java对象，类型转化也安全</p>
+<p>RDD<strong>的缺点</strong>：<br>1.由于它基本和hadoop一样万能的，因此没有针对特殊场景的优化，比如对于结构化数据处理相对于sql来比非常麻烦<br>2.默认采用的是java序列号方式，序列化结果比较大，而且数据存储在java堆内存中，导致gc比较频繁</p>
+</blockquote>
+<p>rdd分区数如何确定的？</p>
+<blockquote>
+<p>数据端是由输入数据的切片数目决定</p>
+</blockquote>
+<p>spark shuffle频繁失败怎么办？有什么好的解决办法？</p>
+<blockquote>
+<p>利用cache以及checkpoint机制</p>
+<p>一般是OOM，资源问题或者需要调优（数据倾斜）</p>
+</blockquote>
+<p>举下spark的transform和action的算子，并讲下区别，用过哪些action算子 </p>
+<p><strong>scala的样例类和伴生对象</strong></p>
+<blockquote>
+</blockquote>
+<p>spark 常用算子 map flatMap</p>
+<blockquote>
+<p>map算子是一对一的关系，flatmap是一对多的关系</p>
+</blockquote>
+<p>foreach和foreachPartition的区别 </p>
+<blockquote>
+<p><strong>针对foreach方法，是我们的方法被传入了迭代器的foreach(每个元素遍历执行一次函数)，</strong></p>
+<p><strong>而对于foreachpartiton方法是迭代器被传入了我们的方法(每个分区执行一次函数，我们获取迭代器后需要自行进行迭代处理，也即上述第二个demo的partition.foreach)</strong></p>
+</blockquote>
+<p>spark 中三个表进行 join ，会有几个 stage?共有几种情况</p>
+<blockquote>
+<ol>
+<li>三张表都很小—1个阶段   单机hash join  无shuffle</li>
+<li>一张表很大，其余表很小 — 1  stage  无shuffle</li>
+<li>两张表很大，一张表很小 —- 2  stage  2次shuffle</li>
+<li>三张表都很大 —- 2  stage  2次shuffle</li>
+</ol>
+</blockquote>
+<p>Spark有遇到过内存溢出吗？spark的OOM可能是因为什么</p>
+<blockquote>
+<p>Map过程中产生大量对象会导致内存溢出；</p>
+<p>数据分布不平衡在Shuffer过程中会导致内存溢出   —  引出数据倾斜调优</p>
+</blockquote>
+<p>spark有那些调度策略</p>
+<blockquote>
+<p>FIFO先来先得</p>
+<p>FAIR公平策略</p>
+</blockquote>
+<p>spark broadcast join底层如何实现</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/duodushuduokanbao/p/9911256.html">https://www.cnblogs.com/duodushuduokanbao/p/9911256.html</a></p>
+<blockquote>
+<ol>
+<li>broadcast阶段：将小表广播到所有的executor上，广播的算法有很多，最简单的是先发给driver，driver再统一分发给所有的executor，要不就是基于bittorrete的p2p思路；</li>
+</ol>
+<p>　　2.hash join阶段：在每个executor上执行 hash join，小表构建为hash table，大表的分区数据匹配hash table中的数据；</p>
+<p>被广播的表需要小于spark.sql.autoBroadcastJoinThreshold所配置的信息，默认是10M；</p>
+<p>基表不能被广播，比如left outer join时，只能广播右表。</p>
+</blockquote>
+<p>Shuffle详细 Shuffle Read Shuffle Write 溢写 </p>
+<blockquote>
+<p>有10个Map Task，2个Reduce Task，2 个Executer，每个Executer有两个2 Core </p>
+<ul>
+<li>问Hash Shuffle 产生的文件个数 10 (Map Task) * 2 (Reduce Task) </li>
+<li>问优化过的Hash Shuffle产生的文件个数 (2 (Executer) * 2 (Core)) * 2 (Reduce Task) </li>
+<li>问SortShuffle产生的文件个数 2 (Executer) * (1 (合并的文件) + 1 (索引))</li>
+</ul>
+</blockquote>
+<p>spark sort  shuffle的优点</p>
+<blockquote>
+<p>Sort Shuffle解决了Hash Shuffle的shuffle write小文件太多、基于HashMap的合并操作容易引发OOM等问题。基于HashMap进行shuffle，对内存要求高</p>
+</blockquote>
+<p>spark广播变量底层原理实现</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/158894710">https://zhuanlan.zhihu.com/p/158894710</a></p>
+</blockquote>
+<p>spark为什么要划分stage</p>
+<p>spark小文件问题（oom）</p>
+<h2 id="mr"><a href="#mr" class="headerlink" title="mr"></a>mr</h2><p>编写的MR程序，每次执行的时候有多少个map ，怎么设置这些，reducetask的数量呢？分区数怎么设置的呢？分区怎么设置</p>
+<blockquote>
+<p>mr的切片机制，见md文件</p>
+<p>reducetask=reduceNumber</p>
+<p>分区设置（默认） (key.hascode &amp; Integer.MAX_VALUE) % reduceTaskNumber</p>
+</blockquote>
+<p>yarn上提交资源的流程</p>
+<blockquote>
+<p>见md文件</p>
+</blockquote>
+<p>mapreduce spark区别</p>
+<blockquote>
+<p>spark基于内存进行计算，尽量减少数据落盘</p>
+<p>mr只支持map和reduce有大量的磁盘io</p>
+</blockquote>
+<p>mapreduce shuffle</p>
+<blockquote>
+<p>见md文件</p>
+</blockquote>
+<p>mapreduce shuffle为什么要环形缓冲区</p>
+<blockquote>
+<p>见md文件</p>
+</blockquote>
+<p>spark mapreduce的使用场景</p>
+<blockquote>
+<p>当机器性能比较低的时候，处理大量离线数据可以使用mr</p>
+</blockquote>
+<p>mapreduce重构成spark任务的限制</p>
+<blockquote>
+<p>数据倾斜？</p>
+</blockquote>
+<p>MR的map阶段完成了几次排序？  </p>
+<blockquote>
+<p>  两次</p>
+<p>数据从环形缓冲区开始溢写到磁盘以前–  快排</p>
+<p>环形缓冲器小文件合并  —  多路归并排序</p>
+</blockquote>
+<p> MR实现一个分组统计</p>
+<blockquote>
+<p>wordCount?</p>
+</blockquote>
+<p>MR实现分组统计的过程中会引发什么问题？如何解决？</p>
+<blockquote>
+<p>数据倾斜 —  多次mr</p>
+</blockquote>
+<p>mapreduce怎么做矩阵乘法</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/liuxinghao/article/details/39958957">https://blog.csdn.net/liuxinghao/article/details/39958957</a></p>
+</blockquote>
+<p>Hadoop1.0和2.0和3.0的区别</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_34696236/article/details/84308457">https://blog.csdn.net/qq_34696236/article/details/84308457</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/267069875">https://zhuanlan.zhihu.com/p/267069875</a></p>
+</blockquote>
+<p>mr常用的调优手段都有哪些？</p>
+<blockquote>
+<p>见文件</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhangzhebjut/article/details/39474621">https://blog.csdn.net/zhangzhebjut/article/details/39474621</a></p>
+</blockquote>
+<p>mr shuffer 的过程</p>
+<blockquote>
+<p>首先map生成k.v键值对会收集在环形缓冲区中，当缓冲区达到80%会溢出到本地磁盘，在溢出过程中会按照key进行分区以及<a href="">排序</a>，然后reducer会根据自己的分区号去本地读取数据文件，读到后会进行合并以及<a href="">排序</a>，然后进入reducer流程</p>
+</blockquote>
+<p>Shuffer过程中的<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%8E%92%E5%BA%8F">排序</a><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a></p>
+<blockquote>
+<p>Map溢出过程中用到的是快排，时间复杂度是nlogn，空间复杂度最优为logn</p>
+</blockquote>
+<p>maptask和reducetask的数量取决于什么</p>
+<blockquote>
+<p>map的task取决于对输入文件的切片数目</p>
+<p>reduce的数目取决于设置的reduceNumber</p>
+</blockquote>
+<p> Hadoop的block大小调大了会造成什么影响？调大好还是调小好一点？为什么？</p>
+<blockquote>
+<p>调小会造成寻址时间占用较长</p>
+</blockquote>
+<h2 id="hive"><a href="#hive" class="headerlink" title="hive"></a>hive</h2><p>hive创建表使用的什么分隔符</p>
+<p>hive表的优化：</p>
+<p>怎么解决数据倾斜:key分布不均匀，数据本身，sql语句本身容易引起倾斜（goupbykey,join,distinct count）groupbykey引起的：参数调优：set hive.groupby.skewindata=true;生成的查询计划会有两个MRJob采用sum() group by的方式来替换count(distinct)完成计算</p>
+<p>hive有一张小表明细表，一张超级大的表join，怎么解决这种容易引起数据倾斜？</p>
+<p>hive表之间有父子依赖关系，几十张表，你是如何处理的？</p>
+<p>Hive使用的时候会将数据同步到hdfs，小文件问题怎么解决的？</p>
+<p>hive的优化</p>
+<p>两个很大的数据集，如何判断重复的数字（bitmap），bitmap有数据大小限制吗   —— 布隆过滤器？</p>
+<p>hive sql编译过程(hive的sql怎么转成mr)</p>
+<p>hive大表进行join，如何分库分表减少数据倾斜</p>
+<p>Hive执行流程 <a target="_blank" rel="noopener" href="https://blog.csdn.net/youzhouliu/article/details/70807993">https://blog.csdn.net/youzhouliu/article/details/70807993</a> </p>
+<p>hiveSQL转换成MapReduce的执行计划包括如下几个步骤： HiveSQL -&gt;AST(抽象语法树) -&gt; QB(查询块) -&gt;OperatorTree（操作树）-&gt;优化后的操作树-&gt;mapreduce任务树-&gt;优化后的mapreduce任务树</p>
+<p>Hive HDFS HBase区别 <a target="_blank" rel="noopener" href="https://blog.csdn.net/wshyb0314/article/details/81475475">https://blog.csdn.net/wshyb0314/article/details/81475475</a></p>
+<p>列式数据库和行式数据库优劣对比 <a target="_blank" rel="noopener" href="http://stor.51cto.com/art/201809/583648.htm">http://stor.51cto.com/art/201809/583648.htm</a></p>
+<p>hive的map/reduce数怎么确定?</p>
+<p>hive数据倾斜怎么办?</p>
+<p>Hive Map数和Reduce数如何确定?</p>
+<p>Hive如何调优?都有哪些参数?</p>
+<p>Hive如何解决小文件问题?Map阶段?Reduce阶段?</p>
+<p>Hive与Mysql的区别</p>
+<p>动态分区静态分区</p>
+<p>cluster by和group by 还有sort by还有order by的区别</p>
+<p> hive join类型的shuffle和sorted merge的优劣？</p>
+<p>cluster by和group by 还有sort by还有order by的区别</p>
+<p>hive map端的join和reduce端的join了解么？</p>
+<p>Hive SQL怎么转为mr程序的</p>
+<p>group by子句中，有两个字段，这个过程会触发几个MR过程？整个SQL代码中会触发几个MR过程？</p>
+<p>hiveSQL解析中的SQL解析为抽象语法树AST具体怎么做的，看过<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%BA%90%E7%A0%81">源码</a>吗</p>
+<p>hive的调优</p>
+<h2 id="hbase"><a href="#hbase" class="headerlink" title="hbase"></a>hbase</h2><p>Hbase底层原理</p>
+<p>Hbase写入过程</p>
+<blockquote>
+<p>写入路径上是先写入WAL（Write-Ahead-Log）即预写日志，再写入memstore缓存，满足一定条件后执行flush操作将缓存数据刷写到磁盘，生成一个HFile数据文件</p>
+</blockquote>
+<p>HBase特点，应用场景</p>
+<blockquote>
+<p>海量存储，即时查询</p>
+</blockquote>
+<p>Hbase单个RegionServer负载太重怎么办？</p>
+<p>Hbase存储的数据量过大怎么处理？</p>
+<p>hbase有什么特点</p>
+<blockquote>
+<p>他的优缺点：海量存储，列式存储，高并发，稀疏（列的灵活性，列族中可以指定任意多的列，在列数据为空的情况下，是不会占用存储空间的），高可用（WAL解决高可用，瞬间写入量）2.单一RowKey固有的局限性决定了它不可能有效地支持多条件查询，不支持SQL语句</p>
+</blockquote>
+<p>hbase的过滤器说几个及其作用：</p>
+<blockquote>
+<p>比较运算符（less,greater_or_equal,NO_OP），比较器（BinaryComparator，BitComparator，NullComparator）。比较过滤器：rowfilter,familyfilter,qualifierfilter,valuefilter,timestampsfilter,Filter rowFilter = new RowFilter(CompareOp.GREATER, new BinaryComparator(“95007”.getBytes()));</p>
+<p>2.专用过滤器：SingleColumnValueFilter -会返回满足条件的整行，单列值排除器 SingleColumnValueExcludeFilter ，前缀过滤器 PrefixFilter—-针对行键，列前缀过滤器 ColumnPrefixFilter，分页过滤器 PageFilter</p>
+</blockquote>
+<p>hbase的高可用</p>
+<blockquote>
+<p>基于zookeeper实现的高可用</p>
+</blockquote>
+<p>hbase有什么缺点</p>
+<blockquote>
+<p>单一RowKey固有的局限性决定了它不可能有效地支持多条件查询，不支持SQL语句</p>
+</blockquote>
+<p>hbase的预分区</p>
+<blockquote>
+<p>建表的时候设置rowkey的start和end，提前做分区，防止以后大哥region过大，进行split</p>
+</blockquote>
+<p>hbase组件角色、读写过程、热点问题、region分区</p>
+<p>hbase/mysql 主从复制</p>
+<blockquote>
+<p>HBase的主从复制不支持DDL操作，换句话说，在master上的DDL操作，不会影响到slave上的数据，所以即使在master上进行了DDL操作，slave上的数据依然没有变化。这个跟MySQL有很大不同，MySQL的DDL可以通过statement格式的Binlog进行复制。</p>
+</blockquote>
+<p>hbase架构</p>
+<blockquote>
+<p>见文件</p>
+</blockquote>
+<p>hbase读写流程</p>
+<blockquote>
+<p>见文件</p>
+<p>写入路径上是先写入WAL（Write-Ahead-Log）即预写日志，再写入memstore缓存，满足一定条件后执行flush操作将缓存数据刷写到磁盘，生成一个HFile数据文件</p>
+</blockquote>
+<p>定位到region的table获取数据，需要打开和读所有的hfile吗?</p>
+<blockquote>
+<p>不需要打开所有的hfile</p>
+</blockquote>
+<p>region主要是用来管理最终table的一个存储。Store里面又有什么呢？ </p>
+<blockquote>
+</blockquote>
+<p>RowKey的设计原则？为什么不能超过一定的长度？为什么要唯一？</p>
+<blockquote>
+<p>见文件</p>
+<p>Hfile里面会有memstore，是占内存里的，太长的话放不了太多数据，减慢检索效率。  hbase是按字典序存储的，所以要利用这个<a href="">排序</a>的特点。</p>
+</blockquote>
+<p>Hbase的Hfile合并</p>
+<blockquote>
+<p>Minor Compaction ： 指选取一些小的、相邻的StoreFile将他们合并成一个更大的StoreFile，在这个过程中不会处理已经Deleted（标记为删除）或Expired（过期）的数据。一次 Minor Compaction 的产生更少并且更大的StoreFile</p>
+<p>Major Compaction：指选取一些小的、相邻的HFile将他们合并成一个更大的HFile。默认情况下，minor compaction会删除选取HFile中的TTL过期数据</p>
+</blockquote>
+<h2 id="Hdfs"><a href="#Hdfs" class="headerlink" title="Hdfs"></a>Hdfs</h2><p>怎么保证高可用集群，一台active机器死掉后另一台的数据怎么保证实时</p>
+<blockquote>
+<p>基于zookeeper的高可用，及高可用下的数据共享  —- editlog的共享存储</p>
+<p>Active NameNode 和 StandbyNameNode 使用 JouranlNode 集群来进行数据同步的过程如图 5 所示，Active NameNode 首先把 EditLog 提交到 JournalNode 集群，然后 Standby NameNode 再从 JournalNode 集群定时同步 EditLog</p>
+</blockquote>
+<p>如果产生大量小文件，会导致什么问题？，如果用户一直对HDFS创建小文件，怎么解决？（我回答的是联邦机制，然后面试官说不太对，有没有其他的办法）</p>
+<blockquote>
+<p>小文件太多会导致NameNode堆内存被大量占用</p>
+</blockquote>
+<p>HDFS HA怎么实现的？DataNode给NameNode发数据失败怎么办？</p>
+<blockquote>
+<p>基于zookeeper+QJM</p>
+<p>ZooKeeper Failover Controller：监控NameNode健康状态，并向Zookeeper注册NameNode；NameNode挂掉后，ZKFC为NameNode竞争锁，获得ZKFC 锁的NameNode变为active</p>
+<p>watcher机制+建立临时节点</p>
+</blockquote>
+<p>hdfs为什么128M</p>
+<blockquote>
+<p>hdfs块过小会导致磁盘寻址时间过长，同时增大namenode的堆内存消耗</p>
+<p>块过大，会导致集群启动的时候速度过慢，同时由于心跳机制，如果数据量过大，namenode节点等待数据节点的心跳时长无法确定</p>
+<p>map任务太少，计算效率低</p>
+</blockquote>
+<p>hdfs的ferderation</p>
+<blockquote>
+</blockquote>
+<p>hdfs中namenode请求太多</p>
+<p>hdfs安全模式</p>
+<p>hdfs副本机制（数据块损坏）</p>
+<blockquote>
+<p>在namenode中对于进行数据块副本的管理都是在<strong>FSnameSystem</strong>中，其中有一个成员变量 corruptReplicats<br>,其中就存储着损坏数据与DataNode的映射，当某个数据块损坏后（DataNode可以通过数据块扫描器获知，通过心跳发送给namenode）,namenode会将损坏的数据块加到corrupReplicats中，当损坏的数据块在DataNode上删除后会在corrutpReplicatS中也删除。<br>当部分副本出现损坏时，namenode进行数据块复制时，有一个数据结构叫做underReplicatedBlocks对象，其中就有list保存需要进行数据块复制的数据块，对于数据块复制是有优先级的，underReplicatedBlocks的getPriority()会返回数据块的优先级，等待复制的对象从underReplicatsBlocks中读取出来之后会生成复制请求，并将请求放入FSnameSystem.pendingReplications中。pendlingReplication是一个数据块到数据块复制信息pendingBlockInfo的映射，pendlingReplication保存了数据块复制的时间和复制副本数，如果复制没成功会被重新插入到underReplicatedBlocks对象中，重新产生复制请求。</p>
+</blockquote>
+<p>HDFS HA怎么实现热备份，这种方式有什么问题</p>
+<blockquote>
+<p><strong>冷备份：</strong> Hadoop1.X ：NameNode（主） SecondaryNameNode（从）<br>在Hadoop1.X中，SecondaryNameNode会按照时间阈值（比如24小时）或者edits日志大小阈值（比如1G），周期性的将fsimage和edits合并成新的fsimage并替换，然后将最新的fsimage推送给NameNode，减少 NameNode 启动时间；<br>非实时merge，一旦NameNode挂了，可能会导致元数据丢失；<br><strong>热备份：</strong> Hadoop2.X：Active NameNode（主） Standby NameNode（从）<br>在Hadoop2.X中采用主从架构，这个动作是由Standby NameNode来完成；一旦Active NameNode挂掉，Standby NameNode会实时同步前者的fsimage，并将merge后的新fsimage文件替换前者中旧的fsimage文件；<br>实时merge，一旦前者挂了，后者能够马上顶上，不会出现元数据丢失；</p>
+<p>问题：切换过程中会出现问题</p>
+</blockquote>
+<p>hadoop HA（是组件自带还是自己设计的），群体日志是什么日志，用处</p>
+<blockquote>
+<p>设计的，群体日志是为了向StandByNameNode共享Active NameNode的元数据修改，使得NameNode中保存的editlogs不会在节点故障的时候丢失，当主节点故障，StandByNameNode会从JN请求合并最新的editlog，合并到内存中，然后立刻切换为active，群体日志使主从节点的操作日志同步共享</p>
+</blockquote>
+<p>editlog和fsimage合并（非HA和HA）</p>
+<blockquote>
+<p>非HA下，namenode节点每隔一定时间或者edits.log达到指定大小，请求secondaryNamenode合并操作</p>
+<p>HA下secondaryNamenode会通过QJM和JN实时更新editlog，并定期进行合并</p>
+</blockquote>
+<p>hdfs文件的元数据包含哪些部分</p>
+<blockquote>
+<p>namespace,块信息</p>
+</blockquote>
+<p>块信息在ha时怎么同步，非ha时两个namenode是否同时有block信息</p>
+<blockquote>
+<p>数据节点同时向主备发送心跳信息</p>
+</blockquote>
+<p>HDFS怎么读文件和写文件的？</p>
+<blockquote>
+<p>见hdfs文件</p>
+</blockquote>
+<p>文件写入过程中namenode发现文件以及存在或者创建者没有权限操作，会返回什么错误</p>
+<p>文件读取的时候怎么确定当前的block在哪个datanode上，读数据使用什么算法确定最优的那个datanode</p>
+<blockquote>
+<p>访问NameNode获取元数据信息，确认</p>
+</blockquote>
+<p>Hadoop的高可用，两个namenode如何保持同步（会通过JournalNodes的独立进程进行相互通信），脑裂和防止脑裂</p>
+<blockquote>
+<p>通过QJM同步读写editlog，使用JN提供的RPC接口进行通信</p>
+</blockquote>
+<p>HDFS，shuffle，yarn资源调度</p>
+<p>hdfs写入的时候client挑选DataNode具体的距离是怎么判断的？底层怎么实现的？有个负载均衡<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>，底层怎么实现</p>
+<blockquote>
+<p>客户端与数据节点之间的网络拓扑结构</p>
+</blockquote>
+<p>namenode启动时datanode向namenode的心跳报告内容</p>
+<blockquote>
+<p>存储的块信息</p>
+<p> DataNode向NameNode握手, 注册, 心跳, 块报告. 并接收NameNode的指令.</p>
+</blockquote>
+<h2 id="flink"><a href="#flink" class="headerlink" title="flink"></a>flink</h2><p>flink 的架构是怎样的？</p>
+<p>flink 的水位线是什么？</p>
+<p>flink怎么保证精准一次消费</p>
+<p>flink checkpoint原理</p>
+<p>怎么保证exactly once</p>
+<p> flink了解多少，讲一讲</p>
+<p>窗口</p>
+<p>flink如何保证经一次语义</p>
+<p>flink如何处理背压</p>
+<p>flink和spark的区别？</p>
+<p>flink双流join底层<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%BA%90%E7%A0%81">源码</a>是怎么实现的</p>
+<p>watermark底层原理<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%BA%90%E7%A0%81">源码</a>中怎么实现的</p>
+<h2 id="kafka"><a href="#kafka" class="headerlink" title="kafka"></a>kafka</h2><p>用Kafka的过程中有过什么问题，怎么解决</p>
+<p>幂等操作</p>
+<p>kafka用的哪个版本，offset存在哪</p>
+<p>怎么保证数据一致性?</p>
+<p>kafka特点？ 使用场景 ？</p>
+<p>kafka的分区 ？kafka一个生产者可以把消息发到多个分区吗？</p>
+<p>kafka消息在磁盘上的组织方式</p>
+<p>kafka如何保证消息的顺序性（partition分区）</p>
+<p> kafka中的语义</p>
+<p>kafka中producer的ack设置</p>
+<p>kafka中topic和partition和broker的关系</p>
+<p>kafka介绍，kafka事件数据重复问题</p>
+<p>kafka怎么实现数据的分类处理，就是一些数据需要删除一些数据要保存什么的。（削峰）</p>
+<p>kafka的消息有序吗？当时是怎么了解kafka这些的？kafka这块是看的相关的书籍还是博客呢?kafka怎么回溯数据？（下游消费kafka里的数据，数据丢了，要重新消费昨天的数据怎么做这个回溯呢？）<br> kafka的数据保存在哪呢？像这种被消费之后的数据。</p>
+<p>kafka的高可用是怎么保证的？</p>
+<p>kafka遇到什么性能瓶颈？</p>
+<p>了解kafka和其他MQ之间的区别吗？比如说activeMQ。</p>
+<p>kafka的哪些设计会提高它的性能。</p>
+<p>对kafka本身有什么了解？kafka的Topic了解吗？原理，topic的结构设计，Topic是个什么东西？</p>
+<p>消费的是leader分区的还是follwer也可以读？ </p>
+<p>为什么不能读follwer？</p>
+<p>什么情况会产漏读呢？消费者可能会丢消息。</p>
+<p>知道ISR队列？</p>
+<p>一般leader怎么判断follwer挂掉？超时时间一般是多少？</p>
+<p>用 ArrayList 和 LinkedList 存储相同的元素个数，哪个使用的空间更大？kafka 是如何解决大数据量的问题（高吞吐的原因）？如果不在允许增加分区的情况下，kafka 是如何解决生产者生产大大数量的，怎样防止数据的堆积？（没回答到点上，今天刚看过，其实可以从kafka 的特性上来说）</p>
+<p>zoo<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=keep">keep</a>er 对于 kafka 的作用</p>
+<p>Kafka，架构，ACK，发送数据，消费数据，高吞吐等</p>
+<p>MapReduce，Zoo<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=keep">keep</a>er，Kafka解释，kafka和反压</p>
+<p>kafka是推还是拉的模式？好处？</p>
+<h2 id="zookeeper"><a href="#zookeeper" class="headerlink" title="zookeeper"></a>zookeeper</h2><p>zookeeper实现分布式锁</p>
+<p>zk如何保证数据的一致性</p>
+<p>zk的协议有哪些</p>
+<p>zk的选举过程</p>
+<p>什么是ZAB协议</p>
+<p>ZK的ZAB选举<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>。他的一个选举<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>。ZK里的节点类型有几种？（临时节点、永久节点用来作什么？）</p>
+<h2 id="yarn"><a href="#yarn" class="headerlink" title="yarn"></a>yarn</h2><p>yarn提交程序的流程</p>
+<h2 id="sql"><a href="#sql" class="headerlink" title="sql"></a>sql</h2><p>sql底层逻辑</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/djm82755/article/details/101452889">https://blog.csdn.net/djm82755/article/details/101452889</a></p>
+</blockquote>
+<p>写一个统计每个学科的前三名</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> <span class="token punctuation">(</span>
+<span class="token keyword">select</span> ROW_NUMBER<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">OVER</span><span class="token punctuation">(</span><span class="token keyword">partition</span> <span class="token keyword">by</span> CourseName <span class="token keyword">ORDER</span> <span class="token keyword">BY</span> Score <span class="token keyword">desc</span><span class="token punctuation">)</span> <span class="token keyword">AS</span> rownum<span class="token punctuation">,</span><span class="token operator">*</span> <span class="token keyword">from</span> MyTest
+<span class="token punctuation">)</span> <span class="token keyword">as</span> a
+<span class="token keyword">where</span> rownum <span class="token operator">&lt;</span> <span class="token number">4</span>
+<span class="token keyword">order</span> <span class="token keyword">by</span> CourseName
+<span class="token comment">------------------------</span>
+
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> MyTest m
+<span class="token keyword">where</span> id <span class="token operator">in</span> <span class="token punctuation">(</span><span class="token keyword">select</span> <span class="token keyword">top</span> <span class="token number">3</span> id <span class="token keyword">from</span> MyTest n <span class="token keyword">where</span> n<span class="token punctuation">.</span>CourseName <span class="token operator">=</span> m<span class="token punctuation">.</span>CourseName <span class="token keyword">order</span> <span class="token keyword">by</span> Score <span class="token keyword">desc</span><span class="token punctuation">)</span>
+<span class="token keyword">order</span> <span class="token keyword">by</span> CourseName<span class="token punctuation">,</span>Score <span class="token keyword">desc</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>sql的join有哪些，有什么区别？</p>
+<blockquote>
+<p>全连接</p>
+<p>左连接</p>
+<p>右连接</p>
+</blockquote>
+<p>行转列,列转行</p>
+<p>live_id,uid,in_time,out_time求每个直播间每分钟最大的在线人数.in_time和out_time是datetime类型</p>
+<p>成绩表求每科的前三名，还有就是求只要有一门课程成绩大于该课程平均成绩就算符合要求的学生名单</p>
+<p>一题是算全年级总分排名前三的学生；另一个算每个班级总分前三的学生（两题用的同一个表）</p>
+<p>①两个表的建表语句：<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E9%94%80%E5%94%AE">销售</a>员维度表，<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E9%94%80%E5%94%AE">销售</a>记录明细表（create）<br>②用SQL计算最近七天每人每天的<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E9%94%80%E5%94%AE">销售</a>总量和总金额（select）</p>
+<p>sql题，求连续活跃5天的用户。</p>
+<p>有一张用户签到表【t_user_attendence】，标记每天用户是否签到（说明：该表包含所有用户所有工作日的出勤记录，<br> 包含三个字段：日期【fdate】，用户id【fuser_id】,用户当天是否签到【fis_sign_in：0否1是】；<br> 问题：请计算截至当前每个用户已经连续签到的天数（输出表仅包含当天签到的所有用户，计算连续签到天数）<br> 输出表【t_user_consecutive_days】:用户id【fuser_id】，用户联系签到天数【fconsecutive_days】<br> 答：直接求出用户最新的未签到日期，用今天的日期减掉即可</p>
+<p>count(*)和count(uid)有啥不同？和count(1)有何不同？</p>
+<p>第一题找出关注列表中的关注对（很常见的，就是两表join）；第二题找出3分种内连续登录次数超过3次的所有用户的id（表两个字段分别是用户id和登录时间）</p>
+<p>left join 和 right join的区别</p>
+<p>连续7天上线的活跃用户</p>
+<p>学生选课，找出至少选了语文，数学，英语这三门课的学生，上亿时，怎么做（比如选了语文-数学-化学）</p>
+<p>某天在线的用户在第7天后那天也在线的用户</p>
+<p>大表关联出现数据倾斜，怎么做，大表和小表，mapjoin的方式，原理</p>
+<p>已知有订单销量表 dwd_ae_trd_all_df, 商品表 dim_ae_itm，请仅用一条SQL查询出在售种类（在售种类=商品类型去重计数）最多和最少（如果最多或最少有多个，随机取1个）的商家，并计算出这两个商家的每日GMV（GMV=订单金额求和）。如果不行，可给出多条SQL版本。<br>  订单销量表 dwd_ae_trd_all_df<br>  商家名称（store）  订单ID（order_id） 订单金额（amount）   订单日期（order_time）<br>  A1         A-43213355      20         2020-07-01 12:30:14<br>  A2         A-43423545      15         2020-07-02 10:10:31<br>  A2         A-413131325     10         2020-06-15 15:13:11<br>  商品表 dim_ae_itm<br>  商家名称（store）  商品名称（name）  商品类型（itm_cate）<br>  A1         air01       运动鞋<br>  A1         air02       休闲鞋<br>  A2         book01       小说书<br>  A2         book02       财经类</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>二叉树后序遍历非递归</p>
+<p>一个数组中,如果相邻两个数相差1,或者只有1个数,就定义为一个可用数组,求最长的可</p>
+<p>两个栈实现队列</p>
+<p>实现微信发红包，输入是红包数和总金额，实现随机分配。（期望要一样）</p>
+<p>奇偶<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E9%93%BE%E8%A1%A8">链表</a>（<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=leetcode">leetcode</a> 328）</p>
+<p>镜像<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>最近公共祖先</p>
+<p>给定数组包含正负数(数量至多差1)，要求将其排列成正负彼此相邻形式，要求时间复杂度O(N)，空间复杂度O(1)</p>
+<p>字符串s中去除”ab”，要求得到的结果不要有”ab”<br>例：s=”aabbc”，结果为”c”    （使用栈解决）</p>
+<p>给定字符串，删除非数字非字母的字符，要求删除后的第一个字母大写，其余小写②全局第一个字母大写<br>答：使用s.toLowerCase()转化为小写，然后将其他一些字母转为大写。</p>
+<p>二维数组，值只能为0或1，要求把所有1所在的行和列全部变为1</p>
+<p> 输出1-n的全排列（还有什么优化的地方）<br> 优化:①对于一般的nums[]是通过交换和提前填充ArrayList<Integer>，省略boolean数组和backtrack里面省略nums数组， 这种方法无法保证字典序。<br> ②对于nums[]是1-n的情况，实际上有两种优化:①省略nums（索引和值只差1）②省略boolean</p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>的广度优先遍历和深度优先遍历。</p>
+<p>n个个位数，全排列组成一个整数。怎么找到最近的下一个比他大的数。时间复杂度要求o（n）。（没写代码，只让我讲思路）<br>返回<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E9%95%9C%E5%83%8F">二叉树的镜像</a>，非递归<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>。</p>
+<p>大数据的<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%8E%92%E5%BA%8F">排序</a>、去重的<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>。（快排在大数据是不适用的）bitmap、布隆过滤平时可了解过</p>
+<p>给定数组包含正负数(数量至多差1)，要求将其排列成正负彼此相邻形式，要求时间复杂度O(N)，空间复杂度O(1)（双指针？）</p>
+<p>非递归<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E5%8F%8D%E8%BD%AC%E9%93%BE%E8%A1%A8">反转链表</a> </p>
+<p>快排</p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>的后序遍历(递归、非递归)</p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE">二分查找</a>有序数组中大于等于target的第一个位置</p>
+<p>数组里面很多字符串数字，找出最大的组合（jzoffer）</p>
+<p>给一个数字和一个数组，找出数组中能组合成这个数字的所有组合数 （dfs+回溯）</p>
+<p>满<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>，求到叶子结点的最大路径</p>
+<p>LeetCode原题129 树到根节点路径之和</p>
+<p>八皇后问题</p>
+<p>鸡鸭同笼问题</p>
+<p>两个数字交换，没有额外空间</p>
+<blockquote>
+<p>a=a+b  b=a-b  a=b-a</p>
+</blockquote>
+<h2 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h2><p>网络七层模型在5G中的变化</p>
+<p>tcp/ip 分层</p>
+<p>tcp和udp的区别</p>
+<p>tcp 三次握手</p>
+<p>http、https、tcp网络协议</p>
+<p>网络分层，tcp,ip,http在哪层<br>http与tcp关系<br> 答：HTTP协议中的数据是利用TCP协议传输的，所以支持HTTP就一定支持TCP。</p>
+<p>TCP四次挥手？<a href="">客户端</a>主动断开，time-wait在哪边？</p>
+<p>服务端没有断开，处于什么状态，状态码？（指的是服务端发送FIN，提醒是close-wait）</p>
+<p>TCP 4次挥手流程（要求越详细越好）</p>
+<ul>
+<li>数据通信7层/5层</li>
+<li>进程之间的通信</li>
+<li>进程相关问题，进程开销问题</li>
+<li>进程和线程问题</li>
+<li>内存方面问题</li>
+</ul>
+<h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><p>什么是数据库的索引？（<a target="_blank" rel="noopener" href="https://www.kancloud.cn/kancloud/theory-of-mysql-index/41855%EF%BC%89">https://www.kancloud.cn/kancloud/theory-of-mysql-index/41855）</a></p>
+<p>数据库中是怎么加快访问速度的 ？ B+树</p>
+<p>那些数据库用到了B+树 ？</p>
+<p>行列数据库区别，数据库索引（b树，b+树）</p>
+<p> join的left join , inner join, cross join</p>
+<p>Join大小表  <a target="_blank" rel="noopener" href="https://blog.csdn.net/u013668852/article/details/79768266">https://blog.csdn.net/u013668852/article/details/79768266</a></p>
+<p>数据库索引的用途，为什么索引会使搜索变快，索引加得越多越好吗，索引应该加在搜索语句的哪里（SELECT, WHERE….)</p>
+<p>Innodb和 MyISAM的区别，为什么MyISAM适合查询多的场景</p>
+<p>mysql的引擎innodb和myisam的区别；索引的数据结构（B树和B+树）；联合索引的最左匹配原则（索引失效）？</p>
+<p>MySQL底层存储</p>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p> B树和B+树的区别，为什么索引使用B+树作为索引的数据结构</p>
+<p>满<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>和完全<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E4%BA%8C%E5%8F%89%E6%A0%91">二叉树</a>的区别</p>
+<p>B+Tree在频繁写的场景里适合么？为什么？</p>
+<p>常见<a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E6%8E%92%E5%BA%8F">排序</a><a target="_blank" rel="noopener" href="https://www.nowcoder.com/jump/super-jump/word?word=%E7%AE%97%E6%B3%95">算法</a>和时间复杂度</p>
+<p>kill和kill -9有啥区别（一个发送SIGTERM，一个发送SIGKILL，SIGKILL不可屏蔽不可捕获）</p>
+<p>Linkedhashmap和hashmap的区别 </p>
+<blockquote>
+<p>LinkedHashMap是继承于HashMap，是基于HashMap和双向<a href="">链表</a>来实现的； </p>
+<p>HashMap无序，LinkedHashMap有序，可分为插入顺序和访问顺序两种，可基于访问顺序实现缓存</p>
+</blockquote>
+<h2 id="java"><a href="#java" class="headerlink" title="java"></a>java</h2><p>hashMap的扩容</p>
+<p>class文件在1.8存储在哪</p>
+<p>JVM内存如何分配?什么时候新生代GC,什么时候老年代GC?</p>
+<p>HashMap和HashTable有什么区别?</p>
+<p>B+树的节点数值在实际数据库中代表着什么？</p>
+<p>指针在实际数据库中代表着什么？</p>
+<p>指针指向内存空间？那内存空间不够用了怎么办？</p>
+<p>B+树的叶子节点在实际数据库中代表着什么？</p>
+<p>java内存区域划分？都是干什么的？</p>
+<p>垃圾回收<a href="">算法</a> ？</p>
+<p>双亲委派，破坏这个机制来实现某些功能的情形<br> 答：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bfa495467014">https://www.jianshu.com/p/bfa495467014</a><br> <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39016934/article/details/103468673?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param">https://blog.csdn.net/qq_39016934/article/details/103468673?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param</a><br>java堆划分<br>对象比较大，生命周期短，GC参数怎么调优<br>强软弱虚引用<br>类加载阶段<br>threadlocal底层<br>线程池的理解<br>JVM内存区域<br>方法栈（不太清楚具体哪个，跳过）<br>栈溢出的情形（递归，调节-Xss）<br>平时遇到内存溢出的情形，处理<br> 答：-Xms和-Xmx,-XX:+HeapDumpOnOutMemoryError，让虚拟机在出现内存溢出异常时Dump出当前的内存堆转储快照以便事后分析。</p>
+<p>Reentrantlock和synchronized底层实现不同<br> 答：AQS和  java对象头，monitor<br>IO多路复用<br>堆外内存介绍，好处，缺点，什么情况使用<br> 答：堆外内存也被称为直接内存。可以通过Unsafe和NIO包下的ByteBuffer来操作堆外内存。 堆外内存会溢出，并且其垃圾回收依赖于代码显式调用System.gc()。 -XX:MaxDirectMemorySize=40M  JVM在堆内只保存堆外内存的引用，用DirectByteBuffer对象来表示。 每个DirectByteBuffer对象在初始化时，都会创建一个对应的Cleaner对象。 这个Cleaner对象会在合适的时候执行unsafe.freeMemory(address)，从而回收这块堆外内存。 当DirectByteBuffer对象在某次YGC中被回收，只有Cleaner对象知道堆外内存的地址。 当下一次FGC执行时，Cleaner对象会将自身Cleaner<a href="">链表</a>上删除，并触发clean方法清理堆外内存。此时，堆外内存将被回收，Cleaner对象也将在下次YGC时被回收。 如果JVM一直没有执行FGC的话，无法触发Cleaner对象执行clean方法，从而堆外内存也一直得不到释放。 使用堆外内存可以减少GC的压力，对于spark来说，能精准控制内存大小。</p>
+<p>对象在堆外需要序列化吗？</p>
+<p>堆内对象写入磁盘需要多少次拷贝（和C有区别），需要经过堆外内存吗（提醒零拷贝mmMap）<br> 答：堆内四次，堆外使用mmMAP零拷贝，两次</p>
+<p>代码是用scala实现的吗？scala比java的优势在什么地方？</p>
+<p>hashmap数据结构(1.7和1.8),为什么用</p>
+<p>hashmap 减少hash冲突处理</p>
+<p>hashmap和hashtable，是null能否插入</p>
+<p>遍历hashmap的方式，在非迭代器的for删除出现的问题（快速失败）</p>
+<p>11.一般hashcode和equals需要重写吗（提示hashmap插入过程先hashcode找到对应桶索引，equals判断是否是同一个然后插入）<br>hashmap数据结构<br>String相等<br>ArrayList 初始化大小,插入什么时候判断扩大（好好看）</p>
+<p> Java的hashMap、hashtable、concurrentHashMap的区别？</p>
+<p> jvm内存区域？哪些是线程公有的？</p>
+<p>读写锁</p>
+<p>ArrayList和LinkedList的区别；hashmap原理，hashmap线程安全怎么解决；hash冲突； </p>
+<p> Synchronized和ReentrantLock的区别； Synchronized是否可重入。 </p>
+<p>java线程池有什么用处和优点，创建线程池的参数有哪些？参数中的阻塞队列是什么？</p>
+<p> Final修饰的int .sting map可以改变吗 </p>
+<p>  Final修饰基本数据类型值不可以改变，但是String，Map，数组等，都可以改变其内部的值，因为他们隶属于类，而类里面的属性还是可更改的</p>
+<h2 id="智力题"><a href="#智力题" class="headerlink" title="智力题"></a>智力题</h2><p>一枚硬币，连续抛了三次，都是正面朝上，第四次抛出后，正面朝上的可能性是多少？（1/2）</p>
+<h2 id="大数据"><a href="#大数据" class="headerlink" title="大数据"></a>大数据</h2><h3 id="50亿url求交集"><a href="#50亿url求交集" class="headerlink" title="50亿url求交集"></a>50亿url求交集</h3><p>题目：给定a、b两个文件，各存放50亿个url，每个url各占64字节，内存限制是4G，让你找出a、b文件共同的url?<br>即两个大文件中找出共同记录的问题，但是内存资源不够<br>每个文件的大小为 5G*64=300G，远远大于4G<br>解决方法：<br>1.分而治之<br>遍历文件a，对每个url求取hash(url)%1000，然后根据所得值将url分别存储到1000个小文件（设为a0,a1,…a999）当中。这样每个小文件的大小约为300M。<br>遍历文件b，采取和a相同的方法将url分别存储到1000个小文件(b0,b1….b999)中。<br>这样处理后，所有可能相同的url都在对应的小文件(a0 vs b0, a1 vs b1….a999 vs b999)当中，不对应的小文件（比如a0 vs b99）不可能有相同的url。然后我们只要求出1000对小文件中相同的url即可。<br>比如对于a0 vs b0，我们可以遍历a0，将其中的url存储到hash_map当中。然后遍历b0，如果url在hash_map中，则说明此url在a和b中同时存在，保存到文件中即可。<br>如果分成的小文件不均匀，导致有些小文件太大（比如大于2G），可以考虑将这些太大的小文件再按类似的方法分成小小文件即可</p>
+<h3 id="100亿数字排序"><a href="#100亿数字排序" class="headerlink" title="100亿数字排序"></a>100亿数字排序</h3><p>1.把这个37GB的大文件，用哈希分成1000个小文件，每个小文件平均38MB左右（理想情况），把100亿个数字对1000取模，模出来的结果在0到999之间，每个结果对应一个文件，所以我这里取的哈希函数是 h = x % 1000，哈希函数取得”好”，能使冲突减小，结果分布均匀。</p>
+<p>2.拆分完了之后，得到一些几十MB的小文件，那么就可以放进内存里排序了，可以用快速排序，归并排序，堆排序等等。</p>
+<p>3.1000个小文件内部排好序之后，就要把这些内部有序的小文件，合并成一个大的文件，可以用二叉堆来做1000路合并的操作，每个小文件是一路，合并后的大文件仍然有序。</p>
+<p>首先遍历1000个文件，每个文件里面取第一个数字，组成 (数字, 文件号) 这样的组合加入到堆里（假设是从小到大排序，用小顶堆），遍历完后堆里有1000个 (数字，文件号) 这样的元素<br>然后不断从堆顶拿元素出来，每拿出一个元素，把它的文件号读取出来，然后去对应的文件里，加一个元素进入堆，直到那个文件被读取完。拿出来的元素当然追加到最终结果的文件里。<br>按照上面的操作，直到堆被取空了，此时最终结果文件里的全部数字就是有序的了。<br>最后我用c++写了个实验程序，具体代码在这里可以看到。</p>
+<p>如何拆分大文件？</p>
+<p>一个32G的大文件，用fopen()打开不会全部加载到内存的，然后for循环遍历啊，把每个数字对1000取模，会得到0到999种结果，然后每种结果在写入到新的文件中，就拆分了</p>
+<h3 id="100M的内存-100G的文件-每行只有一个单词-统计频率最高的20个单"><a href="#100M的内存-100G的文件-每行只有一个单词-统计频率最高的20个单" class="headerlink" title="100M的内存,100G的文件(每行只有一个单词),统计频率最高的20个单"></a>100M的内存,100G的文件(每行只有一个单词),统计频率最高的20个单</h3><h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/531689">https://www.nowcoder.com/discuss/531689</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/531443">https://www.nowcoder.com/discuss/531443</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/517321">https://www.nowcoder.com/discuss/517321</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/504879">https://www.nowcoder.com/discuss/504879</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/496249">https://www.nowcoder.com/discuss/496249</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">fuliangyu</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://fuliangyuzqm.github.io/2021/12/06/%E9%9D%A2%E7%BB%8Fother/">https://fuliangyuzqm.github.io/2021/12/06/%E9%9D%A2%E7%BB%8Fother/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">fuliangyu</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E9%9D%A2%E7%BB%8F/">
+                                    <span class="chip bg-color">面经</span>
+                                </a>
+                            
+                                <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91/">
+                                    <span class="chip bg-color">大数据开发</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: '9UNGkr3Dp4FiRz1sqecibL8f-gzGzoHsz',
+        appKey: 'JxXPzxVqzEw4tHLe891YxU8o',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2021/12/06/Hdfs/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="Hdfs">
+                        
+                        <span class="card-title">Hdfs</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Hdfs基础知识总结
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2021-12-06
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Hadoop/" class="post-category">
+                                    Hadoop
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Hdfs/">
+                        <span class="chip bg-color">Hdfs</span>
+                    </a>
+                    
+                    <a href="/tags/Hadoop/">
+                        <span class="chip bg-color">Hadoop</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2021/12/06/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="计算机操作系统">
+                        
+                        <span class="card-title">计算机操作系统</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            计算机操作系统--面试版
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-12-06
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" class="post-category">
+                                    计算机基础
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                        <span class="chip bg-color">计算机操作系统</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">
+                        <span class="chip bg-color">计算机基础</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+<script>
+    $('#articleContent').on('copy', function (e) {
+        // IE8 or earlier browser is 'undefined'
+        if (typeof window.getSelection === 'undefined') return;
+
+        var selection = window.getSelection();
+        // if the selection is short let's not annoy our users.
+        if (('' + selection).length < Number.parseInt('120')) {
+            return;
+        }
+
+        // create a div outside of the visible area and fill it with the selected text.
+        var bodyElement = document.getElementsByTagName('body')[0];
+        var newdiv = document.createElement('div');
+        newdiv.style.position = 'absolute';
+        newdiv.style.left = '-99999px';
+        bodyElement.appendChild(newdiv);
+        newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+        // we need a <pre> tag workaround.
+        // otherwise the text inside "pre" loses all the line breaks!
+        if (selection.getRangeAt(0).commonAncestorContainer.nodeName === 'PRE' || selection.getRangeAt(0).commonAncestorContainer.nodeName === 'CODE') {
+            newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+        }
+
+        var url = document.location.href;
+        newdiv.innerHTML += '<br />'
+            + '来源: fuliangyu<br />'
+            + '文章作者: fuliangyu<br />'
+            + '文章链接: <a href="' + url + '">' + url + '</a><br />'
+            + '本文章著作权归作者所有，任何形式的转载都请注明出处。';
+
+        selection.selectAllChildren(newdiv);
+        window.setTimeout(function () {bodyElement.removeChild(newdiv);}, 200);
+    });
+</script>
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1,h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1,h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="/libs/aplayer/Meting.min.js"></script>
+
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2021-2022</span>
+            
+            <a href="/about" target="_blank">fuliangyu</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">134.7k</span>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2021";
+                        var startMonth = "12";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://fuliangyuzqm.github.io/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1719398791@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1719398791" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1719398791" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+    <script type="text/javascript" src="/libs/background/ribbon-dynamic.js" async="async"></script>
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<!-- hexo injector body_end start --><script data-pjax>function history_calendar_injector_config(){
+                var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+                var item_html = '<div class="card-widget card-history"><div class="card-content"><div class="item-headline"><i class="fas fa-clock fa-spin"></i><span>那年今日</span></div><div id="history-baidu" style="height: 100px;overflow: hidden"><div class="history_swiper-container" id="history-container" style="width: 100%;height: 100%"><div class="swiper-wrapper" id="history_container_wrapper" style="height:20px"></div></div></div></div>';
+                console.log('已挂载history_calendar')
+                // parent_div_git.innerHTML=item_html+parent_div_git.innerHTML // 无报错，但不影响使用(支持pjax跳转)
+                parent_div_git.insertAdjacentHTML("afterbegin",item_html) // 有报错，但不影响使用(支持pjax跳转)
+            }if( document.getElementsByClassName('sticky_layout')[0] && (location.pathname ==='all'|| 'all' ==='all')){
+
+            history_calendar_injector_config()
+        } </script><script data-pjax  src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script><script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/js/main.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginModelPath":"assets/","model":{"scale":1,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":300,"height":500,"hOffset":30,"vOffset":-10},"mobile":{"show":false},"react":{"opacity":1},"log":false,"pluginJsPath":"lib/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

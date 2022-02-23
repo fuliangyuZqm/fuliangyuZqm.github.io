@@ -1,0 +1,1981 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="计算机操作系统, fuliangyu">
+    <meta name="description" content="进程、线程、协程进程是资源分配的基本单位，线程不拥有资源，线程可以访问隶属进程的资源
+线程是进程调度的基本单位，是进程的一个执行流，是cpu调度和分配的基本单位，比进程更小的能独立运行的基本单位
+由于创建和撤销进程时，系统要回收资源（内存空">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>计算机操作系统 | fuliangyu</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/css/main.css"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">fuliangyu</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/gallery" class="waves-effect waves-light">
+      
+      <i class="fas fa-image" style="zoom: 0.6;"></i>
+      
+      <span>相册</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">fuliangyu</div>
+        <div class="logo-desc">
+            
+            blog
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/gallery" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-image"></i>
+			
+			相册
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/23.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">计算机操作系统</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                <span class="chip bg-color">计算机操作系统</span>
+                            </a>
+                        
+                            <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">
+                                <span class="chip bg-color">计算机基础</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" class="post-category">
+                                计算机基础
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2021-12-06
+                </div>
+                
+
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2022-02-23
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    11.7k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    41 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="进程、线程、协程"><a href="#进程、线程、协程" class="headerlink" title="进程、线程、协程"></a>进程、线程、协程</h2><p><strong>进程是资源分配的基本单位，线程不拥有资源，线程可以访问隶属进程的资源</strong></p>
+<p>线程是进程调度的基本单位，是进程的一个执行流，是cpu调度和分配的基本单位，比进程更小的能独立运行的基本单位</p>
+<p>由于创建和撤销进程时，系统要回收资源（内存空间、IO），付出的开销远大于创建或者撤销线程时的开销，进行进程切换时，要设计执行进程cpu环境的保存及新调度进程cpu环境的设置，切换线程只需要保存少量寄存器内容</p>
+<p>线程从属于进程，是程序的实际执行者，一个进程至少包含一个主线程，也可以有更多的子线程，线程拥有自己的栈空间</p>
+<p><strong>协程是一种比线程更加轻量级的存在，正如一个进程可以拥有多个线程一样，一个线程可以拥有多个协程；协程不是被操作系统内核所管理的，而是完全由程序所控制，也就是在用户态执行。这样带来的好处是性能大幅度的提升，因为不会像线程切换那样消耗资源。</strong></p>
+<p>协程不是进程也不是线程，而是一个特殊的函数，这个函数可以在某个地方挂起，并且可以重新在挂起处外继续运行。所以说，协程与进程、线程相比并不是一个维度的概念</p>
+<h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><p>线程是进程内部的不同的执行路径，是操作系统独立调度的基本单位。一个进程中可以有多个线程，它们共享进程资源。比如说，微信和浏览器是两个进程，浏览器进程里面有很多线程，例如 <code>HTTP</code> 请求线程、事件响应线程、渲染线程等等，线程的并发执行使得在浏览器中点击一个新链接从而发起 <code>HTTP</code> 请求时，浏览器还可以响应用户的其它事件。</p>
+<h4 id="线程有哪两种？"><a href="#线程有哪两种？" class="headerlink" title="线程有哪两种？"></a>线程有哪两种？</h4><ul>
+<li>用户级线程(<code>user level thread</code>)：对于这类线程，有关线程管理的所有工作都由应用程序完成，内核意识不到线程的存在。在应用程序启动后，操作系统分配给该程序一个进程号，以及其对应的内存空间等资源。应用程序通常先在一个线程中运行，该线程被成为主线程。在其运行的某个时刻，可以通过调用线程库中的函数创建一个在相同进程中运行的新线程。<strong>用户级线程的好处是非常高效，不需要进入内核空间，但并发效率不高。</strong> </li>
+<li>内核级线程(<code>kernel level thread</code>)：对于这类线程，有关线程管理的所有工作由内核完成，应用程序没有进行线程管理的代码，只能调用内核线程的接口。内核维护进程及其内部的每个线程，调度也由内核基于线程架构完成。内核级线程的好处是，<strong>内核可以将不同线程更好地分配到不同的CPU，以实现真正的并行计算。</strong> </li>
+</ul>
+<p>事实上，在现代操作系统中，往往使用组合方式实现多线程，即线程创建完全在用户空间中完成，并且一个应用程序中的多个用户级线程被映射到一些内核级线程上，相当于是一种折中方案。</p>
+<h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>进程就是正在执行的程序，是操作系统资源分配的基本单位。一般来说，进程包含指令、数据和<code>PCB</code>。</p>
+<h3 id="孤儿进程和僵尸进程"><a href="#孤儿进程和僵尸进程" class="headerlink" title="孤儿进程和僵尸进程"></a>孤儿进程和僵尸进程</h3><ul>
+<li>孤儿进程就是说一个父进程退出，而它的一个或多个子进程还在运行，那么这些子进程将成为孤儿进程。孤儿进程将被 <code>init</code> 进程(进程<code>ID</code>为<code>1</code>的进程)所收养，并由 <code>init</code> 进程对它们完成状态收集工作。因为孤儿进程会被 <code>init</code> 进程收养，所以孤儿进程不会对系统造成危害。</li>
+<li>僵尸进程就是一个子进程的进程描述符在子进程退出时不会释放，只有当父进程通过 <code>wait()</code> 或 <code>waitpid()</code> 获取了子进程信息后才会释放。如果子进程退出，而父进程并没有调用 <code>wait()</code> 或 <code>waitpid()</code>，那么子进程的进程描述符仍然保存在系统中，这种进程称之为僵尸进程。僵尸进程通过 <code>ps</code> 命令显示出来的状态为 <code>Z</code>。</li>
+<li>系统所能使用的进程号是有限的，如果产生大量僵尸进程，可能会因为没有可用的进程号而导致系统不能产生新的进程。如果要消灭系统中大量的僵尸进程，只需要将其父进程杀死，此时僵尸进程就会变成孤儿进程，从而被 <code>init</code> 进程所收养，这样 <code>init</code> 进程就会释放所有的僵尸进程所占有的资源，从而结束僵尸进程。</li>
+</ul>
+<h3 id="守护进程"><a href="#守护进程" class="headerlink" title="守护进程"></a>守护进程</h3><p><strong>守护进程</strong>是运行在后台的一种特殊进程，它是独立于控制终端的，并周期性地执行某些任务。</p>
+<h3 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h3><ul>
+<li>协程既不是进程也不是线程，协程仅仅是一个特殊的函数，协程它进程和进程不是一个维度的。</li>
+<li>一个进程可以包含多个线程，一个线程可以包含多个协程。</li>
+<li>一个线程内的多个协程虽然可以切换，但是多个协程是串行执行的，只能在一个线程内运行，没法利用CPU多核能力。</li>
+<li>协程与进程一样，切换是存在上下文切换问题的。</li>
+</ul>
+<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><ul>
+<li>进程的切换者是操作系统，切换时机是根据操作系统自己的切换策略，用户是无感知的。进程的切换内容包括页全局目录、内核栈、硬件上下文，切换内容保存在内存中。进程切换过程是由“用户态到内核态到用户态”的方式，切换效率低。</li>
+<li>线程的切换者是操作系统，切换时机是根据操作系统自己的切换策略，用户无感知。线程的切换内容包括内核栈和硬件上下文。线程切换内容保存在内核栈中。线程切换过程是由“用户态到内核态到用户态”， 切换效率中等。</li>
+<li>协程的切换者是用户（编程者或应用程序），切换时机是用户自己的程序所决定的。协程的切换内容是硬件上下文，切换内存保存在用户自己的变量（用户栈或堆）中。协程的切换过程只有用户态，即没有陷入内核态，因此切换效率高。</li>
+</ul>
+<blockquote>
+<p>对于单核单线程<code>CPU</code>而言，在某一时刻只能执行一条<code>CPU</code>指令。上下文切换(<code>Context Switch</code>)是一种将<code>CPU</code>资源从一个进程分配给另一个进程的机制。从用户角度看，计算机能够并行运行多个进程，这恰恰是操作系统通过快速上下文切换造成的结果。在切换的过程中，操作系统需要先存储当前进程的状态(包括内存空间的指针，当前执行完的指令等等)，再读入下一个进程的状态，然后执行此进程。</p>
+</blockquote>
+<h3 id="进程状态"><a href="#进程状态" class="headerlink" title="进程状态"></a>进程状态</h3><p><img src=".%5Cpic%5C6638786_1596672140326_ProcessState.png" alt="img"></p>
+<ul>
+<li>在五状态模型里面，进程一共有<code>5</code>中状态，分别是创建、就绪、运行、终止、阻塞。 </li>
+<li>运行状态就是进程正在<code>CPU</code>上运行。在单处理机环境下，每一时刻最多只有一个进程处于运行状态。 </li>
+<li>就绪状态就是说进程已处于准备运行的状态，即进程获得了除<code>CPU</code>之外的一切所需资源，一旦得到<code>CPU</code>即可运行。 </li>
+<li>阻塞状态就是进程正在等待某一事件而暂停运行，比如等待某资源为可用或等待<code>I/O</code>完成。即使<code>CPU</code>空闲，该进程也不能运行。 </li>
+</ul>
+<p><strong>运行态→阻塞态</strong>：往往是由于等待外设，等待主存等资源分配或等待人工干预而引起的。<br><strong>阻塞态→就绪态</strong>：则是等待的条件已满足，只需分配到处理器后就能运行。<br><strong>运行态→就绪态</strong>：不是由于自身原因，而是由外界原因使运行状态的进程让出处理器，这时候就变成就绪态。例如时间片用完，或有更高优先级的进程来抢占处理器等。<br><strong>就绪态→运行态</strong>：系统按某种策略选中就绪队列中的一个进程占用处理器，此时就变成了运行态。</p>
+<h2 id="CPU上下文切换"><a href="#CPU上下文切换" class="headerlink" title="CPU上下文切换"></a>CPU上下文切换</h2><p>上下文切换 就是先把前一个任务的 CPU 上下文保存起来，然后加载新任务的上下文到这些寄存器和程序计数器，最后再跳转到程序计数器所指定的新位置，运行任务。而这些保存起来的上下文，会存储在系统内核中，并在任务重新调度执行时再次加载。这样就能保证任务原来的状态不受影响，让任务看起来是连续的。</p>
+<p>上下文切换是多任务操作系统的基本功能。多任务操作系统就是其中多个进程看似同时且在彼此之间互不干扰的单个CPU上执行的操作系统。这种并发错觉是通过快速连续（每秒数十次或数百次）发生的上下文切换来实现的。这些上下文切换是由于进程自愿放弃其在CPU中的时间而导致的，或者是由于在进程用完其CPU 时间片时调度程序进行切换而发生的。</p>
+<h2 id="并发和并行有什么区别？"><a href="#并发和并行有什么区别？" class="headerlink" title="并发和并行有什么区别？"></a>并发和并行有什么区别？</h2><ul>
+<li>并发就是在一段时间内，多个任务都会被处理；但在某一时刻，只有一个任务在执行。单核处理器可以做到并发。比如有两个进程<code>A</code>和<code>B</code>，<code>A</code>运行一个时间片之后，切换到<code>B</code>，<code>B</code>运行一个时间片之后又切换到<code>A</code>。因为切换速度足够快，所以宏观上表现为在一段时间内能同时运行多个程序。</li>
+<li>并行就是在同一时刻，有多个任务在执行。这个需要多核处理器才能完成，在微观上就能同时执行多条指令，不同的程序被放到不同的处理器上运行，这个是物理上的多个进程同时进行。</li>
+</ul>
+<h2 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h2><ol>
+<li>管道pipe：管道是一种半双工的通信方式，数据只能单向流动，而且只能在具有亲缘关系的进程间使用。进程的亲缘关系通常是指父子进程关系。</li>
+<li>命名管道FIFO：有名管道也是半双工的通信方式，但是它允许无亲缘关系进程间的通信。</li>
+<li>消息队列MessageQueue：消息队列是由消息的链表，存放在内核中并由消息队列标识符标识。消息队列克服了信号传递信息少、管道只能承载无格式字节流以及缓冲区大小受限等缺点。</li>
+<li>共享存储SharedMemory：共享内存就是映射一段能被其他进程所访问的内存，这段共享内存由一个进程创建，但多个进程都可以访问。共享内存是最快的 IPC 方式，它是针对其他进程间通信方式运行效率低而专门设计的。它往往与其他通信机制，如信号量，配合使用，来实现进程间的同步和通信。</li>
+<li>信号量Semaphore：信号量是一个计数器，可以用来控制多个进程对共享资源的访问。它常作为一种锁机制，防止某进程正在访问共享资源时，其他进程也访问该资源。因此，主要作为进程间以及同一进程内不同线程之间的同步手段。</li>
+<li>套接字Socket：套解口也是一种进程间通信机制，与其他通信机制不同的是，它可用于不同及其间的进程通信。</li>
+<li>信号 ( sinal ) ： 信号是一种比较复杂的通信方式，用于通知接收进程某个事件已经发生。</li>
+</ol>
+<h2 id="进程调度算法"><a href="#进程调度算法" class="headerlink" title="进程调度算法"></a>进程调度算法</h2><h3 id="先来先服务调度算法"><a href="#先来先服务调度算法" class="headerlink" title="先来先服务调度算法"></a>先来先服务调度算法</h3><p> 先来先服务调度算法是一种最简单的调度算法，也称为先进先出或严格排队方案。当每个进程就绪后，它加入就绪队列。当前正运行的进程停止执行，选择在就绪队列中存在时间最长的进程运行。该算法既可以用于作业调度，也可以用于进程调度。先来先去服务比较适合于常作业（进程），而不利于段作业（进程）。</p>
+<pre class="line-numbers language-none"><code class="language-none">FCFS调度算法是一种最简单的调度算法，该调度算法既可以用于作业调度也可以用于进程调度。在作业调度中，算法每次从后备作业队列中选择最先进入该队列的一个或几个作业，将它们调入内存，分配必要的资源，创建进程并放入就绪队列。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p> 在进程调度中，FCFS调度算法每次从就绪队列中选择最先进入该队列的进程，将处理机分配给它，使之投入运行，直到完成或因某种原因而阻塞时才释放处理机。</p>
+<p> FCFS调度算法属于不可剥夺算法。从表面上看，它对所有作业都是公平的，但若一个长作业先到达系统，就会使后面许多短作业等待很长时间，因此它不能作为分时系统和实时系统的主要调度策略。但它常被结合在其他调度策略中使用。例如，在使用优先级作为调度策略的系统中，往往对多个具有相同优先级的进程按FCFS原则处理。</p>
+<p> FCFS调度算法的特点是算法简单，但效率低；对长作业比较有利，但对短作业不利（相对SJF和高响应比）；有利于CPU繁忙型作业，而不利于I/O繁忙型作业。</p>
+<h3 id="时间片轮转调度法"><a href="#时间片轮转调度法" class="headerlink" title="时间片轮转调度法"></a>时间片轮转调度法</h3><pre class="line-numbers language-none"><code class="language-none">时间片轮转调度算法主要适用于分时系统。在这种算法中，系统将所有就绪进程按到达时间的先后次序排成一个队列，进程调度程序总是选择就绪队列中第一个进程执行，即先来先服务的原则，但仅能运行一个时间片，如100ms。在使用完一个时间片后，即使进程并未完成其运行，它也必须释放出（被剥夺）处理机给下一个就绪的进程，而被剥夺的进程返回到就绪队列的末尾重新排队，等候再次运行。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p> 在时间片轮转调度算法中，时间片的大小对系统性能的影响很大。如果时间片足够大，以至于所有进程都能在一个时间片内执行完毕，则时间片轮转调度算法就退化为先来先服务调度算法。如果时间片很小，那么处理机将在进程间过于频繁切换，使处理机的开销增大，而真正用于运行用户进程的时间将减少。因此时间片的大小应选择适当。</p>
+<p> 时间片的长短通常由以下因素确定：系统的响应时间、就绪队列中的进程数目和系统的处理能力。</p>
+<h3 id="短作业-SJF-优先调度算法"><a href="#短作业-SJF-优先调度算法" class="headerlink" title="短作业(SJF)优先调度算法"></a>短作业(SJF)优先调度算法</h3><p> 短作业（进程）优先调度算法是指对短作业（进程）优先调度的算法。短作业优先(SJF)调度算法是从后备队列中选择一个或若干个估计运行时间最短的作业，将它们调入内存运行。而短进程优先(SPF)调度算法，则是从就绪队列中选择一个估计运行时间最短的进程，将处理机分配给它，使之立即执行，直到完成或发生某事件而阻塞时，才释放处理机。</p>
+<p> 短作业优先调度算法是一个非抢占策略，他的原则是下一次选择预计处理时间最短的进程，因此短进程将会越过长作业，跳至队列头。该算法即可用于作业调度，也可用于进程调度。但是他对长作业不利，不能保证紧迫性作业（进程）被及时处理，作业的长短只是被估算出来的。</p>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>该算法对长作业不利，SJF调度算法中长作业的周转时间会增加。更严重的是，如果有一长作业进入系统的后备队列，由于调度程序总是优先调度那些 (即使是后进来的）短作业，将导致长作业长期不被调度（“饥饿”现象，注意区分“死锁”。后者是系统环形等待，前者是调度策略问题）。</li>
+<li>该算法完全未考虑作业的紧迫程度，因而不能保证紧迫性作业会被及时处理。</li>
+<li>由于作业的长短只是根据用户所提供的估计执行时间而定的，而用户又可能会有意或无意地缩短其作业的估计运行时间，致使该算法不一定能真正做到短作业优先调度。</li>
+</ul>
+<blockquote>
+<p>【注意】 SJF调度算法的平均等待时间、平均周转时间最少。</p>
+</blockquote>
+<h3 id="最短剩余时间优先"><a href="#最短剩余时间优先" class="headerlink" title="最短剩余时间优先"></a>最短剩余时间优先</h3><p> 最短剩余时间是针对最短进程优先增加了抢占机制的版本。在这种情况下，进程调度总是选择预期剩余时间最短的进程。当一个进程加入到就绪队列时，他可能比当前运行的进程具有更短的剩余时间，因此只要新进程就绪，调度程序就能可能抢占当前正在运行的进程。像最短进程优先一样，调度程序正在执行选择函数是必须有关于处理时间的估计，并且存在长进程饥饿的危险。</p>
+<h3 id="优先级调度算法"><a href="#优先级调度算法" class="headerlink" title="优先级调度算法"></a>优先级调度算法</h3><p>优先级调度算法又称优先权调度算法，该算法既可以用于作业调度，也可以用于进程调度，该算法中的优先级用于描述作业运行的紧迫程度。</p>
+<p>在作业调度中，优先级调度算法每次从后备作业队列中选择优先级最髙的一个或几个作业，将它们调入内存，分配必要的资源，创建进程并放入就绪队列。在进程调度中，优先级调度算法每次从就绪队列中选择优先级最高的进程，将处理机分配给它，使之投入运行。</p>
+<p>根据新的更高优先级进程能否抢占正在执行的进程，可将该调度算法分为：</p>
+<ul>
+<li>非剥夺式优先级调度算法。当某一个进程正在处理机上运行时，即使有某个更为重要或紧迫的进程进入就绪队列，仍然让正在运行的进程继续运行，直到由于其自身的原因而主动让出处理机时（任务完成或等待事件），才把处理机分配给更为重要或紧迫的进程。</li>
+<li>剥夺式优先级调度算法。当一个进程正在处理机上运行时，若有某个更为重要或紧迫的进程进入就绪队列，则立即暂停正在运行的进程，将处理机分配给更重要或紧迫的进程。</li>
+</ul>
+<p>而根据进程创建后其优先级是否可以改变，可以将进程优先级分为以下两种：</p>
+<ul>
+<li>静态优先级。优先级是在创建进程时确定的，且在进程的整个运行期间保持不变。确定静态优先级的主要依据有进程类型、进程对资源的要求、用户要求。</li>
+<li>动态优先级。在进程运行过程中，根据进程情况的变化动态调整优先级。动态调整优先级的主要依据为进程占有CPU时间的长短、就绪进程等待CPU时间的长短。</li>
+</ul>
+<h3 id="多级反馈队列调度算法"><a href="#多级反馈队列调度算法" class="headerlink" title="多级反馈队列调度算法"></a>多级反馈队列调度算法</h3><p>多级反馈队列算法，不必事先知道各种进程所需要执行的时间，他是当前被公认的一种较好的进程调度算法。</p>
+<p>多级反馈队列调度算法的实现思想如下：</p>
+<ol>
+<li>应设置多个就绪队列，并为各个队列赋予不同的优先级，第1级队列的优先级最高，第2级队列次之，其余队列的优先级逐次降低。</li>
+<li>赋予各个队列中进程执行时间片的大小也各不相同，在优先级越高的队列中，每个进程的运行时间片就越小。例如，第2级队列的时间片要比第1级队列的时间片长一倍， ……第i+1级队列的时间片要比第i级队列的时间片长一倍。</li>
+<li>当一个新进程进入内存后，首先将它放入第1级队列的末尾，按FCFS原则排队等待调度。当轮到该进程执行时，如它能在该时间片内完成，便可准备撤离系统；如果它在一个时间片结束时尚未完成，调度程序便将该进程转入第2级队列的末尾，再同样地按FCFS 原则等待调度执行；如果它在第2级队列中运行一个时间片后仍未完成，再以同样的方法放入第3级队列……如此下去，当一个长进程从第1级队列依次降到第 n 级队列后，在第 n 级队列中便釆用时间片轮转的方式运行。</li>
+<li>仅当第1级队列为空时，调度程序才调度第2级队列中的进程运行；仅当第1 ~ (i-1)级队列均为空时，才会调度第i级队列中的进程运行。如果处理机正在执行第i级队列中的某进程时，又有新进程进入优先级较高的队列（第 1 ~ (i-1)中的任何一个队列），则此时新进程将抢占正在运行进程的处理机，即由调度程序把正在运行的进程放回到第i级队列的末尾，把处理机分配给新到的更高优先级的进程。</li>
+</ol>
+<p>多级反馈队列的优势有：</p>
+<ul>
+<li><ul>
+<li>终端型作业用户：短作业优先。<ul>
+<li>短批处理作业用户：周转时间较短。</li>
+<li>长批处理作业用户：经过前面几个队列得到部分执行，不会长期得不到处理。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><p>死锁是指两个或两个以上的进程在执行过程中，由于竞争资源或者由于彼此通信而造成的一种阻塞的现象，若无外力作用，它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁，这些永远在互相等待的进程称为死锁进程。</p>
+<h3 id="怎么防止死锁"><a href="#怎么防止死锁" class="headerlink" title="怎么防止死锁"></a>怎么防止死锁</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/piyongduo3393/article/details/89377943">https://blog.csdn.net/piyongduo3393/article/details/89377943</a></p>
+<p>死锁的四个必要条件：</p>
+<ul>
+<li>互斥：至少有一个资源必须属于非共享模式，即一次只能被一个进程使用；若其他申请使用该资源，那么申请进程必须等到该资源被释放为止；</li>
+<li>请求与保持条件：一个进程因请求资源而阻塞时，对已获得的资源保持不放。</li>
+<li>不剥夺条件：进程已获得的资源，在末使用完之前，不能强行剥夺。</li>
+<li>循环等待条件：若干进程之间形成一种头尾相接的循环等待资源关系。</li>
+</ul>
+<p>这四个条件是死锁的必要条件，只要系统发生死锁，这些条件必然成立，而只要上述条件之一不满足，就不会发生死锁所以，在系统设计、进程调度等方面注意如何不让这四个必要条件成立，如何确定资源的合理分配算法，避免进程永久占据系统资源。此外，也要防止进程在处于等待状态的情况下占用资源。因此，对资源的分配要给予合理的规划</p>
+<h3 id="处理方法"><a href="#处理方法" class="headerlink" title="处理方法"></a>处理方法</h3><ul>
+<li>解决死锁的基本方法主要有 预防死锁、避免死锁、检测死锁、解除死锁 、鸵鸟策略 等</li>
+</ul>
+<ol>
+<li>死锁预防： 预先静态分配法：破坏了“不可剥夺条件”； 资源有序分配法：破坏了“环路条件”</li>
+<li>死锁避免：设法破坏4个必要条件之一，严格防止死锁的发生， 银行家算法：若发现分配资源后进入不安全状态，则不予分配；若仍处于安全状态，则实施分配。</li>
+<li>死锁检测：允许死锁产生，定时地运行一个死锁检测程序，判断系统是否发生死锁。</li>
+<li>死锁解除： 资源剥夺法，撤销进程法</li>
+</ol>
+<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/piyongduo3393/article/details/89377943">https://blog.csdn.net/piyongduo3393/article/details/89377943</a></p>
+<h3 id="虚拟内存和物理内存"><a href="#虚拟内存和物理内存" class="headerlink" title="虚拟内存和物理内存"></a>虚拟内存和物理内存</h3><p>  直接从物理内存读写数据要比从硬盘读写数据要快的多，因此，我们希望所有数据的读取和写入都在内存完成，而内存是有限的，这样就引出了物理内存与虚拟内存的概念。<br>物理内存就是系统硬件提供的内存大小，是真正的内存，相对于物理内存，在linux下还有一个虚拟内存的概念，虚拟内存就是为了满足物理内存的不足而提出的策略，它是利用磁盘空间虚拟出的一块逻辑内存，用作虚拟内存的磁盘空间被称为交换空间（Swap Space）。<br>     作为物理内存的扩展，linux会在物理内存不足时，使用交换分区的虚拟内存，更详细的说，就是内核会将暂时不用的内存块信息写到交换空间，这样以来，物理内存得到了释放，这块内存就可以用于其它目的，当需要用到原始的内容时，这些信息会被重新从交换空间读入物理内存。<br>     linux的内存管理采取的是分页存取机制，为了保证物理内存能得到充分的利用，内核会在适当的时候将物理内存中不经常使用的数据块自动交换到虚拟内存中，而将经常使用的信息保留到物理内存。<br>     要深入了解linux内存运行机制，需要知道下面提到的几个方面：</p>
+<pre><code> 1. 首先，Linux系统会不时的进行页面交换操作，以保持尽可能多的空闲物理内存，即使并没有什么事情需要内存，Linux也会交换出暂时不用的内存页面。这可以避免等待交换所需的时间。
+    2. 其次，linux进行页面交换是有条件的，不是所有页面在不用时都交换到虚拟内存，linux内核根据”最近最经常使用“算法，仅仅将一些不经常使用的页面文件交换到虚拟内存，有时我们会看到这么一个现象：linux物理内存还有很多，但是交换空间也使用了很多。其实，这并不奇怪，例如，一个占用很大内存的进程运行时，需要耗费很多内存资源，此时就会有一些不常用页面文件被交换到虚拟内存中，但后来这个占用很多内存资源的进程结束并释放了很多内存时，刚才被交换出去的页面文件并不会自动的交换进物理内存，除非有这个必要，那么此刻系统物理内存就会空闲很多，同时交换空间也在被使用，就出现了刚才所说的现象了。关于这点，不用担心什么，只要知道是怎么一回事就可以了。
+    3. 最后，交换空间的页面在使用时会首先被交换到物理内存，如果此时没有足够的物理内存来容纳这些页面，它们又会被马上交换出去，如此以来，虚拟内存中可能没有足够空间来存储这些交换页面，最终会导致linux出现假死机、服务异常等问题，linux虽然可以在一段时间内自行恢复，但是恢复后的系统已经基本不可用了。
+       因此，合理规划和设计linux内存的使用，是非常重要的.
+</code></pre>
+<h3 id="虚拟内存优点"><a href="#虚拟内存优点" class="headerlink" title="虚拟内存优点"></a>虚拟内存优点</h3><blockquote>
+<ol>
+<li>内存布局 —— 当第一个程序分配走特定数目的内存空间后，可用内存初始范围将不再是0-n了，开发者得妥善处理内存偏移。</li>
+<li>内存分段。当内存被不断地分配回收之后，可用空间会逐渐变成越来越小的碎片，会越来越难以找到整块的空间分配给新的程序或者数据。</li>
+<li>安全性。 如果程序A不小心覆盖了程序B的数据？或者有人故意从其他进程中读取敏感数据，比如密码和信用卡信息？</li>
+</ol>
+</blockquote>
+<ol>
+<li>每个程序都可以有一个从0开始的虚拟内存地址空间，这大大简化了程序猿的编码，因为不需要再去手动维护内存地址的偏移了。</li>
+<li>即便物理内存地址不连续但虚拟内存地址可以做到总是连续的，这样操作系统算是间接完成了将内存碎片合并成一块可用内存的艰巨工作。</li>
+</ol>
+<h3 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/thrillerz/p/6031561.html">https://www.cnblogs.com/thrillerz/p/6031561.html</a></p>
+<h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>分页就是说，将磁盘或者硬盘分为大小固定的数据块，叫做页，然后内存也分为同样大小的块，叫做页框。</p>
+<p>当进程执行的时候，会将磁盘的页载入内存的某些页框中，并且正在执行的进程如果发生缺页中断也会发生这个过程。页和页框都是由两个部分组成的，一个是页号或者页框号，一个是偏移量。分页一般是有硬件来完成的，每个页都对应一个页框，它们的对应关系存放在一个叫做页表的数据结构中，页号作为这个页表的索引，页框号作为页表的值。操作系统负责维护这个页表。</p>
+<h3 id="请页和换页"><a href="#请页和换页" class="headerlink" title="请页和换页"></a>请页和换页</h3><p>分页对程序员是透明的，但是分段需要程序员显式划分每个段。 </p>
+<p>分页的地址空间是一维地址空间，分段是二维的。 </p>
+<p>页的大小不可变，段的大小可以动态改变。 </p>
+<p>分页主要用于实现虚拟内存，从而获得更大的地址空间；分段主要是为了使程序和数据可以被划分为逻辑上独立的地址空间并且有助于共享和保护。</p>
+<h2 id="软连接和硬连接"><a href="#软连接和硬连接" class="headerlink" title="软连接和硬连接"></a>软连接和硬连接</h2><h3 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/stupid56862/article/details/90785420">https://blog.csdn.net/stupid56862/article/details/90785420</a></p>
+<blockquote>
+<p>inode叫做索引节点号，这是Linux文件系统管理文件的方式。在建立文件系统时，会建立一个索引节点表，里面包含一定数量的索引节点。每当建立一个文件时，就会为他分配一个索引节点号，相当于文件的地址。</p>
+<p>Linux 把每个文件的权限与属性记录在 inode(“索引节点：index node “) 中，而且每个文件占用一个独立的 inode 表格，该表格的默认大小为 128 字节，里面记录着这些信息：</p>
+<p>文件的访问权限(read、write、execute)<br>该文件的所有者与所属组(owner、group)<br>该文件的大小(size)<br>该文件的创建或内容修改时间(ctime)<br>该文件的最后一次访问时间(atime)<br>该文件的修改时间(mtime)<br>文件的特殊权限(SUID、SGID、SBIT)<br>该文件的真实数据地址(point)。</p>
+</blockquote>
+<p>在 Linux 系统中 ，inode 号才是文件的唯一标识而非文件名。文件名只是为了方便人们的记忆和适用。</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">ls</span> -li
+total xx
+<span class="token number">533124</span> drwxr-xr-x <span class="token number">9</span> apple apple <span class="token number">4096</span> May  <span class="token number">4</span> <span class="token number">10</span>:22 apache-tomcat-8.5.41
+<span class="token number">360908</span> -rw-rw-r-- <span class="token number">1</span> apple apple   <span class="token number">18</span> Jun  <span class="token number">1</span> <span class="token number">23</span>:50 helloWolrd
+<span class="token number">360974</span> drwxr-xr-x <span class="token number">4</span> apple apple <span class="token number">4096</span> Jun  <span class="token number">3</span> <span class="token number">10</span>:15 hi-cat
+<span class="token number">393217</span> drwxrwxr-x <span class="token number">6</span> apple apple <span class="token number">4096</span> May <span class="token number">28</span> 09:37 program
+<span class="token number">518079</span> drwxrwxr-x <span class="token number">3</span> apple apple <span class="token number">4096</span> Mar  <span class="token number">4</span> <span class="token number">11</span>:31 project<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如上述命令 “ls -li” 结果中的第一列就是文件的 inode 号。系统是通过 inode 号寻找正确的文件数据块。</p>
+<p>文件的实际内容则保存在 block 中(大小可以是 1KB、2KB 或 4KB)，一个 inode 的默认大小为 128B (在 Ext3 文件系统中),记录一个 block 则消耗 4B 。当文件的 inode 被写满后，Linux 系统会自动分配出一个 Block 块，专门用于像 innode 那样记录其他 block 块的信息，这样能把各个 block 块的内容串到一起，就能够让用户读到完整的文件内容了。</p>
+<p>对于存储文件内容的的 Block 块，有以下两种常见情况，以 4KB 的 block 大小为例说明情况 :</p>
+<p>文件很小(1KB) , 但依然会占用一个 block ，因此会潜在占用 3kb。<br>文件很大(5kb) ， 那么会占用两个 block。</p>
+<h3 id="block"><a href="#block" class="headerlink" title="block"></a>block</h3><blockquote>
+<p>如果是文件的block，那么记录的是文件的详细内容</p>
+<p>创建目录的时候，会分配一个inode和至少一个block，block记录的是目录下所有文件的inode，而创建文件的时候，一个文件会占用一个inode，inode记录文件属性和文件内容所在的block</p>
+</blockquote>
+<h3 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h3><blockquote>
+<p>硬链接是通过索引节点进行的链接。在Linux中，多个文件指向同一个索引节点是允许的，像这样的链接就是硬链接。硬链接只能在同一文件系统中的文件之间进行链接，不能对目录进行创建。如果删除硬链接对应的源文件，则硬链接文件仍然存在，而且保存了原有的内容，这样可以起到防止因为误操作而错误删除文件的作用。由于硬链接是有着相同 inode 号仅文件名不同的文件，因此，删除一个硬链接文件并不影响其他有相同 inode 号的文件。</p>
+</blockquote>
+<p>可以将它理解为一个 “指向原始文件 inode 的指针”，系统不为它分配独立的 inode 和 文件。所以，硬链接文件与原始文件其实是同一个文件，只是名字不同。我们每添加一个硬链接，该文件的 innode 连接数就会增加 1 ； 而且只有当该文件的 inode 连接数为 0 时，才算彻底被将它删除。因此即便删除原始文件，依然可以通过硬链接文件来访问。需要注意的是，我们不能跨分区对文件进行链接</p>
+<p><img src="/images/20201223225823232.png" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>硬链接占据空间吗 ？ 比如我有一个 1G 的文件，现在我给这个文件建了一个硬链接。那么会占据 2G 空间吗?<br>不会，之前我们说了硬链接是一个指针或者说是文件的引用。只占一点点空间。</p>
+</blockquote>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token builtin class-name">echo</span> <span class="token string">"hello world"</span> <span class="token operator">></span> helloWorld
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">ln</span> helloWorld  hardHelloWorld
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> helloWorld 
+hello world
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> hardHelloWorld 
+hello world
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">ls</span>  -lhi hardHelloWorld  helloWorld 
+<span class="token number">360888</span> -rw-rw-r-- <span class="token number">2</span> apple apple <span class="token number">12</span> Jun  <span class="token number">4</span> <span class="token number">17</span>:10 hardHelloWorld  // 第一列为 inode 号，第三列为 inode 连接数
+<span class="token number">360888</span> -rw-rw-r-- <span class="token number">2</span> apple apple <span class="token number">12</span> Jun  <span class="token number">4</span> <span class="token number">17</span>:10 helloWorld    // 两个文件的 inode 号是一样的。
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">rm</span> helloWorld 
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> hardHelloWorld 
+hello world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+<h3 id="软连接"><a href="#软连接" class="headerlink" title="软连接"></a>软连接</h3><blockquote>
+<p>软链接（也叫符号链接）与硬链接不同，<strong>文件用户数据块中存放的内容是另一文件的路径名的指向。软链接就是一个普通文件，只是数据块内容有点特殊。软链接可对文件或目录创建</strong>。</p>
+<p>软链接主要应用于以下两个方面：一是方便管理，例如可以把一个复杂路径下的文件链接到一个简单路径下方便用户访问；另一方面就是解决文件系统磁盘空间不足的情况。例如某个文件文件系统空间已经用完了，但是现在必须在该文件系统下创建一个新的目录并存储大量的文件，那么可以把另一个剩余空间较多的文件系统中的目录链接到该文件系统中，这样就可以很好的解决空间不足问题。删除软链接并不影响被指向的文件，但若被指向的原文件被删除，则相关软连接就变成了死链接。</p>
+</blockquote>
+<p>软链接(symbolic link) ： 等同于 Windows 系统下的快捷方式。仅仅包括所含链接文件的路径名字。因此能链接目录，也能跨文件系统链接。但是，当删除原始文件后，链接文件也将失效。</p>
+<p>ln 用于创建软或硬链接。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-s</td>
+<td>创建软链接(如果不带 -s 参数，默认创建硬链接)</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>强制创建文件或目录的链接</td>
+</tr>
+<tr>
+<td>-i</td>
+<td>覆盖前先询问</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>显示创建链接的过程</td>
+</tr>
+</tbody></table>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token builtin class-name">echo</span> <span class="token string">"hello world"</span> <span class="token operator">></span> helloWorld 
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">ln</span> -s helloWorld  sHelloWorld
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> helloWorld 
+hello world
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> sHelloWorld 
+hello world
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">rm</span> helloWorld 
+<span class="token punctuation">[</span>apple@VM_0_8_centos ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> sHelloWorld 
+cat: sHelloWorld: No such <span class="token function">file</span> or directory<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="Linux命令"><a href="#Linux命令" class="headerlink" title="Linux命令"></a>Linux命令</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_23329167/article/details/83856430">https://blog.csdn.net/qq_23329167/article/details/83856430</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/linux/linux-command-manual.html">https://www.runoob.com/linux/linux-command-manual.html</a></p>
+<ul>
+<li>pwd</li>
+<li>top</li>
+<li>find</li>
+<li>vim</li>
+<li>cat</li>
+<li>tail</li>
+<li>tar -zcvf</li>
+<li>tar -zxvf</li>
+<li>ps -ef | grep </li>
+<li>locate(每天更新一次)</li>
+<li>updatedb更新linux文件数据库</li>
+<li>crontab</li>
+<li><strong>ifconfig</strong>  查看网卡信息</li>
+</ul>
+<h3 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h3><p><a target="_blank" rel="noopener" href="https://www.linuxprobe.com/linux-awk-clever.html">https://www.linuxprobe.com/linux-awk-clever.html</a></p>
+<blockquote>
+<p>awk是一个强大的文本分析工具，简单来说awk就是把文件逐行读入，（空格，制表符）为默认分隔符将每行切片，切开的部分再进行各种分析处理</p>
+</blockquote>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> <span class="token punctuation">[</span>-F field-separator<span class="token punctuation">]</span> <span class="token string">'commands'</span> input-file<span class="token punctuation">(</span>s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<blockquote>
+<p>[-F 分隔符]是可选的，因为awk使用空格，制表符作为缺省的字段分隔符，因此如果要浏览字段间有空格，制表符的文本，不必指定这个选项，但如果要浏览诸如/etc/passwd文件，此文件各字段以冒号作为分隔符，则必须指明-F选项</p>
+</blockquote>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token builtin class-name">echo</span> <span class="token string">"this is a test"</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'&#123; print $0 &#125;'</span>  
+<span class="token comment">## 输出为   this is a test</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<blockquote>
+<p><code>shell</code>读取用户输入的字符串发现|，代表有管道。|左右被理解为简单<a target="_blank" rel="noopener" href="https://www.linuxcool.com/">命令</a>，即前一个（左边）简单命令的标准输出指向后一个（右边）标准命令的标准输入<br><code>awk</code>会根据分隔符（-F）将行分成若干个字段，<strong>$0为整行，$1为第一个字段，$2 为第2个地段，依此类推…</strong></p>
+<p>为打印一个字段或所有字段，使用print命令。这是一个<code>awk</code>动作</p>
+</blockquote>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token builtin class-name">echo</span> <span class="token string">"this is a test"</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'&#123; print $1 &#125;'</span>  
+<span class="token comment">## 输出为  </span>
+<span class="token comment">#this  </span>
+<span class="token builtin class-name">echo</span> <span class="token string">"this is a test"</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'&#123; print $1, $2 &#125;'</span>  
+<span class="token comment">## 输出为  </span>
+<span class="token comment">#this is</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+<h4 id="只显示-etc-passwd的账户"><a href="#只显示-etc-passwd的账户" class="headerlink" title="只显示/etc/passwd的账户"></a><strong>只显示/etc/passwd的账户</strong></h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> -F <span class="token builtin class-name">:</span> <span class="token string">'&#123; print $1 &#125;'</span> /etc/passwd  
+<span class="token comment">## 输出为  </span>
+<span class="token comment">#root  </span>
+<span class="token comment">#bin  </span>
+<span class="token comment">#daemon  </span>
+adm  
+lp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="显示-etc-passwd的第1列和第7列，用逗号分隔显示，所有行开始前添加列名start1，start7，最后一行添加，end1，end7"><a href="#显示-etc-passwd的第1列和第7列，用逗号分隔显示，所有行开始前添加列名start1，start7，最后一行添加，end1，end7" class="headerlink" title="显示/etc/passwd的第1列和第7列，用逗号分隔显示，所有行开始前添加列名start1，start7，最后一行添加，end1，end7"></a><strong>显示/etc/passwd的第1列和第7列，用逗号分隔显示，所有行开始前添加列名start1，start7，最后一行添加，end1，end7</strong></h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'BEGIN &#123;print "start1,start7"&#125; &#123;print $1 "," $7&#125; END &#123;print "end1,end7"&#125;'</span> /etc/passwd  
+<span class="token comment">## 输出为  </span>
+<span class="token comment">#start1,start7  </span>
+<span class="token comment">#root,/bin/bash  </span>
+<span class="token comment">#bin,/sbin/nologin  </span>
+<span class="token comment">#daemon,/sbin/nologin  </span>
+<span class="token comment">#adm,/sbin/nologin  </span>
+<span class="token comment">#lp,/sbin/nologin  </span>
+<span class="token comment">#end1,end7</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="统计-etc-passwd文件中，每行的行号，每行的列数"><a href="#统计-etc-passwd文件中，每行的行号，每行的列数" class="headerlink" title="统计/etc/passwd文件中，每行的行号，每行的列数"></a><strong>统计/etc/passwd文件中，每行的行号，每行的列数</strong></h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'&#123; print NR "  " NF "  " $0 &#125;'</span> /etc/passwd  <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<table>
+<thead>
+<tr>
+<th>变量名</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FILENAME</td>
+<td>当前文件名</td>
+</tr>
+<tr>
+<td>FS</td>
+<td>设置输入字段分隔符，等价于命令行-F选项</td>
+</tr>
+<tr>
+<td>NF</td>
+<td>number of Field，当前行的字段的个数，字段数量</td>
+</tr>
+<tr>
+<td>NR</td>
+<td>行号，当前处理的文本行的行号</td>
+</tr>
+<tr>
+<td>FNR</td>
+<td>当awk处理多个文件是，分别对每个文件的行数进行计数。</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>toupper(s)</td>
+<td>返回s的大写</td>
+</tr>
+<tr>
+<td>tolower(s)</td>
+<td>返回s的小写</td>
+</tr>
+<tr>
+<td>length(s)</td>
+<td>返回s长度</td>
+</tr>
+<tr>
+<td>substr(s,p)</td>
+<td>返回字符串s中从p开始的后缀部分</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="返回字符长度"><a href="#返回字符长度" class="headerlink" title="返回字符长度"></a>返回字符长度</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> <span class="token string">'BEGIN &#123; print length("this is a text") &#125;'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h4 id="转换为大写"><a href="#转换为大写" class="headerlink" title="转换为大写"></a>转换为大写</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'&#123; print toupper($1) &#125;'</span> /etc/passwd<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h4 id="正则匹配"><a href="#正则匹配" class="headerlink" title="正则匹配"></a>正则匹配</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#显示/etc/passwd中有daemon的行</span>
+<span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'$0 ~ /daemon/'</span> /etc/passwd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#输出第一个字段的第一个字符大于d的行</span>
+<span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'&#123; if ($1 > "d") &#123; print $1 &#125; else &#123; print "-" &#125; &#125;'</span> /etc/passwd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+
+
+<h3 id="sed"><a href="#sed" class="headerlink" title="sed"></a>sed</h3><blockquote>
+<p>Linux sed 命令是利用脚本来处理文本文件。</p>
+<p>sed 可依照脚本的指令来处理、编辑文本文件。</p>
+<p>Sed 主要用来自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序等。</p>
+</blockquote>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token function">sed</span> <span class="token punctuation">[</span>-hnV<span class="token punctuation">]</span><span class="token punctuation">[</span>-e<span class="token operator">&lt;</span>script<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">[</span>-f<span class="token operator">&lt;</span>script文件<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">[</span>文本文件<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>参数：</p>
+<ul>
+<li>-e&lt;script&gt;或–expression=&lt;script&gt; 以选项中指定的script来处理输入的文本文件。</li>
+<li>-f&lt;script文件&gt;或–file=&lt;script文件&gt; 以选项中指定的script文件来处理输入的文本文件。</li>
+<li>-h或–help 显示帮助。</li>
+<li>-n或–quiet或–silent 仅显示script处理后的结果。</li>
+<li>-V或–version 显示版本信息。</li>
+</ul>
+<p>动作说明：</p>
+<ul>
+<li>a ：新增， a 的后面可以接字串，而这些字串会在新的一行出现(目前的下一行)～</li>
+<li>c ：取代， c 的后面可以接字串，这些字串可以取代 n1,n2 之间的行！</li>
+<li>d ：删除，因为是删除啊，所以 d 后面通常不接任何咚咚；</li>
+<li>i ：插入， i 的后面可以接字串，而这些字串会在新的一行出现(目前的上一行)；</li>
+<li>p ：打印，亦即将某个选择的数据印出。通常 p 会与参数 sed -n 一起运行～</li>
+<li>s ：取代，可以直接进行取代的工作哩！通常这个 s 的动作可以搭配正规表示法！例如 1,20s/old/new/g 就是啦！</li>
+</ul>
+<h4 id="以行为单位的替换与显示"><a href="#以行为单位的替换与显示" class="headerlink" title="以行为单位的替换与显示"></a>以行为单位的替换与显示</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#在testfile文件的第四行后添加一行，并将结果输出到标准输出，在命令行提示符下输入如下命令：</span>
+<span class="token function">sed</span> -e 4a<span class="token punctuation">\</span>newLine testfile 
+<span class="token comment">#将 /etc/passwd 的内容列出并且列印行号，同时，请将第 2~5 行删除！</span>
+ <span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'2,5d'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#输出/etc/passwd 的第二行，将第二行按照冒号分割，输出第一个（列）</span>
+<span class="token function">sed</span> -n <span class="token string">'2p'</span> /etc/passwd <span class="token operator">|</span> <span class="token function">awk</span> -F <span class="token string">':'</span> <span class="token string">'&#123;print $1&#125;'</span>
+<span class="token comment">#搜索 /etc/passwd有root关键字的行如果root找到，除了输出所有行，还会输出匹配行。</span>
+<span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'/root/p'</span>
+<span class="token comment">#使用-n的时候将只打印包含模板的行。</span>
+<span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> -n <span class="token string">'/root/p'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#删除/etc/passwd所有包含root的行，其他行输出</span>
+<span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span>  <span class="token string">'/root/d'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<h4 id="数据的搜寻并执行命令"><a href="#数据的搜寻并执行命令" class="headerlink" title="数据的搜寻并执行命令"></a>数据的搜寻并执行命令</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#搜索/etc/passwd,找到root对应的行，执行后面花括号中的一组命令，每个命令之间用分号分隔，这里把bash替换为blueshell，再输出这行</span>
+<span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> -n <span class="token string">'/root/&#123;s/bash/blueshell/;p;q&#125;'</span>    
+<span class="token comment">#最后的q是退出。</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="数据的搜寻并替换"><a href="#数据的搜寻并替换" class="headerlink" title="数据的搜寻并替换"></a>数据的搜寻并替换</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#除了整行的处理模式之外， sed 还可以用行为单位进行部分数据的搜寻并取代。基本上 sed 的搜寻与替代的与 vi 相当的类似</span>
+<span class="token function">sed</span> <span class="token string">'s/要被取代的字串/新的字串/g'</span>
+<span class="token comment">#先观察原始信息，利用 /sbin/ifconfig 查询 IP，本机的ip是192.168.1.100。将 IP 前面的部分予以删除</span>
+/sbin/ifconfig eth0 <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'inet addr'</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.*addr://g'</span>
+<span class="token comment">#将 IP 后面的部分予以删除</span>
+/sbin/ifconfig eth0 <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'inet addr'</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.*addr://g'</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/Bcast.*$//g'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="多点编辑"><a href="#多点编辑" class="headerlink" title="多点编辑"></a>多点编辑</h4><pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#一条sed命令，删除/etc/passwd第三行到末尾的数据，并把bash替换为blueshell</span>
+<span class="token function">nl</span> /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> -e <span class="token string">'3,$d'</span> -e <span class="token string">'s/bash/blueshell/'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<h3 id="nl"><a href="#nl" class="headerlink" title="nl"></a>nl</h3><blockquote>
+<p>nl命令在<a target="_blank" rel="noopener" href="http://codex.wordpress.org.cn/Linux">linux</a>系统中用来计算文件中行号。nl 可以将输出的文件内容自动的加上行号！其默认的结果与 cat -n 有点不太一样， nl 可以将行号做比较多的显示设计，包括位数与是否自动补齐 0 等等的功能。 </p>
+</blockquote>
+<ol>
+<li><strong>命令格式：</strong></li>
+</ol>
+<p>nl [选项]… [文件]…</p>
+<ol start="2">
+<li><p><strong>命令参数：</strong></p>
+<p>-b ：指定行号指定的方式，主要有两种：</p>
+<p>​        -b a ：表示不论是否为空行，也同样列出行号(类似 cat -n)；</p>
+<p>​        -b t ：如果有空行，空的那一行不要列出行号(默认值)；</p>
+<p>-n ：列出行号表示的方法，主要有三种：</p>
+<p>​        -n ln ：行号在萤幕的最左方显示；</p>
+<p>​        -n rn ：行号在自己栏位的最右方显示，且不加 0 ；</p>
+<p>​        -n rz ：行号在自己栏位的最右方显示，且加 0 ；</p>
+<p>-w：行号栏位的占用的位数。</p>
+<p>-p：在逻辑定界符处不重新开始计算。 </p>
+</li>
+</ol>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#用 nl 列出 log2012.log 的内容</span>
+<span class="token function">nl</span> log2012.log
+<span class="token comment">#用 nl 列出 log2012.log 的内容，空本行也加上行号</span>
+<span class="token function">nl</span> -b a log2012.log
+<span class="token comment">#让行号前面自动补上0,统一输出格式</span>
+<span class="token function">nl</span> -b a -n rz log2014.log 
+<span class="token comment">#nl -b a -n rz 命令行号默认为六位，要调整位数可以加上参数 -w 3 调整为3位。</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+<h3 id="Linux之管道符"><a href="#Linux之管道符" class="headerlink" title="Linux之管道符"></a>Linux之管道符</h3><h4 id="多命令执行符"><a href="#多命令执行符" class="headerlink" title="多命令执行符"></a><strong>多命令执行符</strong></h4><p><img src="/images/20190514155646106.png" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>ls;date;pwd 会按照顺序依次执行<br>ls &amp;&amp; echo yes || echo no<br>ls命令执行正确打印yes执行错误打印no</p>
+</blockquote>
+<h4 id="管道符"><a href="#管道符" class="headerlink" title="管道符"></a>管道符</h4><blockquote>
+<p>承上启下：把上一个指令的输出作为下一个指令的输入来执行</p>
+</blockquote>
+<p><img src="/images/20190514160720706.png" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>ps aux | grep nginx<br>命令1: （ps aux）ps命令就是最基本进程查看命令，-a ： 显示现行终端机下的所有进程，包括其他用户的进程；<br>-u ：以用户为主的进程状态 ；x ：通常与 a 这个参数一起使用，可列出较完整信息。<br>命令2：（grep nginx）从ps aux执行结果中寻找含有nginx的行</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/468422?channel=-1&amp;source_id=profile_follow_post_nctrack">https://www.nowcoder.com/discuss/468422?channel=-1&amp;source_id=profile_follow_post_nctrack</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">fuliangyu</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://fuliangyuzqm.github.io/2021/12/06/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">https://fuliangyuzqm.github.io/2021/12/06/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">fuliangyu</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">
+                                    <span class="chip bg-color">计算机操作系统</span>
+                                </a>
+                            
+                                <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">
+                                    <span class="chip bg-color">计算机基础</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: '9UNGkr3Dp4FiRz1sqecibL8f-gzGzoHsz',
+        appKey: 'JxXPzxVqzEw4tHLe891YxU8o',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2021/12/06/%E9%9D%A2%E7%BB%8Fother/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="面经other">
+                        
+                        <span class="card-title">面经other</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            面经-大数据开发工程师
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2021-12-06
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E9%9D%A2%E7%BB%8F/" class="post-category">
+                                    面经
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E9%9D%A2%E7%BB%8F/">
+                        <span class="chip bg-color">面经</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91/">
+                        <span class="chip bg-color">大数据开发</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2021/12/06/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="计算机网络">
+                        
+                        <span class="card-title">计算机网络</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            计算机网络基础知识--面试版
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-12-06
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" class="post-category">
+                                    计算机基础
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">
+                        <span class="chip bg-color">计算机基础</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                        <span class="chip bg-color">计算机网络</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+<script>
+    $('#articleContent').on('copy', function (e) {
+        // IE8 or earlier browser is 'undefined'
+        if (typeof window.getSelection === 'undefined') return;
+
+        var selection = window.getSelection();
+        // if the selection is short let's not annoy our users.
+        if (('' + selection).length < Number.parseInt('120')) {
+            return;
+        }
+
+        // create a div outside of the visible area and fill it with the selected text.
+        var bodyElement = document.getElementsByTagName('body')[0];
+        var newdiv = document.createElement('div');
+        newdiv.style.position = 'absolute';
+        newdiv.style.left = '-99999px';
+        bodyElement.appendChild(newdiv);
+        newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+        // we need a <pre> tag workaround.
+        // otherwise the text inside "pre" loses all the line breaks!
+        if (selection.getRangeAt(0).commonAncestorContainer.nodeName === 'PRE' || selection.getRangeAt(0).commonAncestorContainer.nodeName === 'CODE') {
+            newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+        }
+
+        var url = document.location.href;
+        newdiv.innerHTML += '<br />'
+            + '来源: fuliangyu<br />'
+            + '文章作者: fuliangyu<br />'
+            + '文章链接: <a href="' + url + '">' + url + '</a><br />'
+            + '本文章著作权归作者所有，任何形式的转载都请注明出处。';
+
+        selection.selectAllChildren(newdiv);
+        window.setTimeout(function () {bodyElement.removeChild(newdiv);}, 200);
+    });
+</script>
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1,h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1,h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="/libs/aplayer/Meting.min.js"></script>
+
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2021-2022</span>
+            
+            <a href="/about" target="_blank">fuliangyu</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">134.7k</span>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2021";
+                        var startMonth = "12";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://fuliangyuzqm.github.io/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1719398791@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1719398791" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1719398791" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+    <script type="text/javascript" src="/libs/background/ribbon-dynamic.js" async="async"></script>
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<!-- hexo injector body_end start --><script data-pjax>function history_calendar_injector_config(){
+                var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+                var item_html = '<div class="card-widget card-history"><div class="card-content"><div class="item-headline"><i class="fas fa-clock fa-spin"></i><span>那年今日</span></div><div id="history-baidu" style="height: 100px;overflow: hidden"><div class="history_swiper-container" id="history-container" style="width: 100%;height: 100%"><div class="swiper-wrapper" id="history_container_wrapper" style="height:20px"></div></div></div></div>';
+                console.log('已挂载history_calendar')
+                // parent_div_git.innerHTML=item_html+parent_div_git.innerHTML // 无报错，但不影响使用(支持pjax跳转)
+                parent_div_git.insertAdjacentHTML("afterbegin",item_html) // 有报错，但不影响使用(支持pjax跳转)
+            }if( document.getElementsByClassName('sticky_layout')[0] && (location.pathname ==='all'|| 'all' ==='all')){
+
+            history_calendar_injector_config()
+        } </script><script data-pjax  src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script><script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/js/main.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginModelPath":"assets/","model":{"scale":1,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":300,"height":500,"hOffset":30,"vOffset":-10},"mobile":{"show":false},"react":{"opacity":1},"log":false,"pluginJsPath":"lib/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

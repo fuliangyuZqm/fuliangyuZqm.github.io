@@ -1,0 +1,2255 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Hbase, fuliangyu">
+    <meta name="description" content="架构逻辑架构
+
+物理架构
+
+数据模型逻辑上，HBase 的数据模型同关系型数据库很类似，数据存储在一张表中，有行有列。但从HBase 的底层物理存储结构（K-V）来看，HBase 更像是一个multi-dimensional map。
+Na">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Hbase | fuliangyu</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/css/main.css"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">fuliangyu</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/gallery" class="waves-effect waves-light">
+      
+      <i class="fas fa-image" style="zoom: 0.6;"></i>
+      
+      <span>相册</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">fuliangyu</div>
+        <div class="logo-desc">
+            
+            blog
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/gallery" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-image"></i>
+			
+			相册
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/fuliangyuZqm/fuliangyuZqm.github.io" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Hbase</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Hadoop/">
+                                <span class="chip bg-color">Hadoop</span>
+                            </a>
+                        
+                            <a href="/tags/Hbase/">
+                                <span class="chip bg-color">Hbase</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Hadoop/" class="post-category">
+                                Hadoop
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2021-12-06
+                </div>
+                
+
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2022-02-23
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    21.2k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    78 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p><strong>逻辑架构</strong></p>
+<p><img src="/images/clipboard-1605178131264.png" alt="img"></p>
+<p><strong>物理架构</strong></p>
+<p><img src="/images/clipboard-1605178131265.png" alt="img"></p>
+<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>逻辑上，HBase 的数据模型同关系型数据库很类似，数据存储在一张表中，有行有列。但从HBase 的底层物理存储结构（K-V）来看，HBase 更像是一个multi-dimensional map。</p>
+<p><strong>Name Space</strong></p>
+<p>命名空间，类似于关系型数据库的DatabBase 概念，每个命名空间下有多个表。HBase有两个自带的命名空间，分别是hbase和default，hbase 中存放的是HBase 内置的表，default 表是用户默认使用的命名空间。</p>
+<p><strong>Region</strong></p>
+<p>类似于关系型数据库的表概念。不同的是，HBase 定义表时只需要声明列族即可，不需要声明具体的列。这意味着，往HBase 写入数据时，字段可以动态、按需指定。因此，和关系型数据库相比，HBase 能够轻松应对字段变更的场景。</p>
+<p><strong>Row</strong></p>
+<p>HBase 表中的每行数据都由一个RowKey 和多个Column（列）组成，<strong>数据是按照RowKey的字典顺序存储的</strong>，并且查询数据时只能根据RowKey 进行检索，所以RowKey 的设计十分重要。</p>
+<p><strong>Column</strong></p>
+<p>HBase 中的每个列都由Column Family(列族)和Column Qualifier（列限定符）进行限定，例如info：name，info：age。建表时只需指明列族，而列限定符无需预先定义。</p>
+<p><strong>Time Stamp</strong></p>
+<p>用于标识数据的不同版本（version），每条数据写入时，如果不指定时间戳，系统会自动为其加上该字段，其值为写入HBase 的时间。</p>
+<p><strong>Cell</strong></p>
+<p>由{rowkey, column Family：column Qualifier, time Stamp} 唯一确定的单元。cell 中的数据是没有类型的，全部是字节码形式存贮</p>
+<h2 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h2><p><img src="/images/clipboard-1605714888923.png" alt="img"></p>
+<p><strong>Region Server</strong></p>
+<p>Region Server 为 Region 的管理者，其实现类为HRegionServer，主要作用如下:</p>
+<ul>
+<li>对于数据的操作：get, put, delete；</li>
+<li>对于Region 的操作：splitRegion、compactRegion，切分过大的region；</li>
+</ul>
+<p><strong>Master</strong></p>
+<p>Master 是所有Region Server 的管理者，其实现类为HMaster，主要作用如下：</p>
+<ul>
+<li>对于表的操作：create, delete, alter</li>
+<li>对于RegionServer 的操作：分配regions 到每个RegionServer，监控每个RegionServer的状态，负载均衡和故障转移。</li>
+</ul>
+<p><strong>Zookeeper</strong></p>
+<p>HBase 通过Zookeeper 来做Master 的高可用、RegionServer 的监控、元数据的入口以及集群配置的维护等工作。</p>
+<ul>
+<li>使得HMaster不再是单点故障。可以使用HA通过选举，保证任何时候，集群中只有一个活着的HMaster，HMaster与RegionServers 启动时会向ZooKeeper注册</li>
+<li>实时监控Regionserver的上线和下线信息。并实时通知给HMaster</li>
+<li>存贮所有Region的寻址入口 其实就是存储的 –root-位置信息</li>
+<li>存储HBase的schema和table元数据</li>
+</ul>
+<p><strong>Region</strong></p>
+<p>分布式存储的最小单元。负载均衡的最小单元</p>
+<ul>
+<li>一个Region Server上可以维护多个region     √</li>
+<li>一个region可以分布在多台Region Server上   ×</li>
+</ul>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1074535">高可用</a></h2><h3 id="基于zookeeper实现高可用"><a href="#基于zookeeper实现高可用" class="headerlink" title="基于zookeeper实现高可用"></a>基于zookeeper实现高可用</h3><h2 id="数据备份"><a href="#数据备份" class="headerlink" title="数据备份"></a>数据备份</h2><ol>
+<li>不可逆DDL问题</li>
+</ol>
+<p>HBase的高可用不支持DDL操作，换句话说，在master上的DDL操作，不会影响到slave上的数据，所以即使在master上进行了DDL操作，slave上的数据依然没有变化。这个跟MySQL有很大不同，MySQL的DDL可以通过statement格式的Binlog进行复制</p>
+<ol start="2">
+<li>离线MR影响线上业务问题</li>
+</ol>
+<p>高可用的最大好处就是可以进行读写分离，离线MR可以直接跑在slave上，master继续对外提供写服务，这样也就不会影响到线上的业务，当然HBase的高可用复制是异步进行的，在slave上进行MR分析，数据可能会有稍微延迟。</p>
+<ol start="3">
+<li>意外情况</li>
+</ol>
+<p>对于像核心交换机故障、断电等意外情况，slave跨机架或者跨机房部署都能解决该种情况。</p>
+<blockquote>
+<p>基于以上原因，如果是核心服务，对于可用性要求非常高，可以搭建HBase的高可用来保障服务较高的可用性，在HBase的Master出现异常时，只需简单把流量切换到Slave上，即可完成故障转移，保证服务正常运行。</p>
+</blockquote>
+<h3 id="主从模式"><a href="#主从模式" class="headerlink" title="主从模式"></a>主从模式</h3><p><img src="/images/image-20201223211432308.png" alt="image-20201223211432308"></p>
+<blockquote>
+<p>主从模式（Master-Slave）这种模式比起简单的备份模式多了很多优点，可以通过最终一致性保证数据的一致性，数据从主集群到备集群延时较低，异步写入不会对主集群带来性能压力，基本不会产生多少性能的影响，突发事件来临时数据丢失很少，并且主集群的事务在备集群也可以得以保证。一般通过构造较好的Log系统加上check Point来实现，可以实现读写分离，主集群可以担当读写服务，但备集群一般只承担读服务。</p>
+<p>•    Hbase Replication主从模式通过指定备集群，<strong>将Hlog里面的数据异步发送到备集群</strong>，对主集群基本没有性能影响，数据延时时间较短。主集群提供读写服务，备集群提供读服务。如果主集群有故障，可以快速切换到备集群。回过头来我们可以看看Hbase的备份状况</p>
+<p>•    Hbase 简单备份模式如果表不在线比较好办，可以通过copy table或者是distcp + add table来解决。如果表在线并且不能让其下线，只有通过snapshot方案对online的table实施备份</p>
+</blockquote>
+<p><strong>HBase的replication是以Column Family为单位的，每个Column Family都可以设置是否进行replication。</strong></p>
+<p>上图中，一个Master对应了3个Slave，Master上每个RegionServer都有一份HLog，在开启Replication的情况下，<strong>每个RegionServer都会开启一个线程用于读取该RegionServer上的HLog，并且发送到各个Slave，Zookeeper用于保存当前已经发送的HLog的位置</strong>。</p>
+<p>Master与Slave之间采用异步通信的方式，保障Master上的性能不会受到Slave的影响。用Zookeeper保存已经发送HLog的位置，主要考虑在Slave复制过程中如果出现问题后重新建立复制，可以找到上次复制的位置。</p>
+<p><img src="/images/20200909100149978535.png" alt="分享图片"></p>
+<blockquote>
+<p><strong>HBase Replication步骤：</strong></p>
+<ol>
+<li>HBase Client向Master写入数据</li>
+<li>对应RegionServer写完HLog后返回Client请求</li>
+<li>同时replication线程轮询HLog发现有新的数据，发送给Slave</li>
+<li>Slave处理完数据后返回给Master</li>
+<li>Master收到Slave的返回信息，在Zookeeper中标记已经发送到Slave的HLog位置</li>
+</ol>
+<p><strong>注：</strong>在进行replication时，Master与Slave的配置并不一定相同，比如Master上可以有3台RegionServer，Slave上并不一定是3台，Slave上的RegionServer数量可以不一样，数据如何分布这个HBase内部会处理。</p>
+</blockquote>
+<h3 id="主主模式"><a href="#主主模式" class="headerlink" title="主主模式"></a>主主模式</h3><p>主主模式 (Master-Master)原理总体类似于主从模式，不同的是2个集群可以互相承担写的分离，都可承担读写服务</p>
+<p> Hbase Replication主主模式2个集群互为主备，都提供读写服务，读写分离。</p>
+<blockquote>
+<p> 2阶段提交这种方案保证了强一致性和事务，服务器返回给客户端成功则表明数据一定已经成功备份，不会造成任何数据丢失。每台服务器都可承担读写服务。但缺点是造成集群延迟较高，总体吞吐下降。</p>
+<p>Paxos<a target="_blank" rel="noopener" href="http://lib.csdn.net/base/datastructure">算法</a>基于Paxos算法的实现的强一致性方案，同一客户端连接的server能保证数据的一致性。缺点是实现复杂，集群延迟和吞吐随着集群服务器增加而变差。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>备份</th>
+<th>主从</th>
+<th>主主</th>
+<th>2PC</th>
+<th>Paxos</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据一致性</td>
+<td>差</td>
+<td>保证最终一致性</td>
+<td></td>
+<td>强一致性</td>
+<td></td>
+</tr>
+<tr>
+<td>事务</td>
+<td>无</td>
+<td>主集群保证</td>
+<td>分别保证</td>
+<td>主集群保证</td>
+<td>主集群保证</td>
+</tr>
+<tr>
+<td>延迟</td>
+<td>低</td>
+<td>低</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>吞吐量</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>低</td>
+<td>低</td>
+</tr>
+<tr>
+<td>数据丢失</td>
+<td>大量</td>
+<td>最近短暂时间丢失</td>
+<td>最近短暂时间丢失</td>
+<td>无丢失</td>
+<td>无丢失</td>
+</tr>
+<tr>
+<td>集群服务</td>
+<td>无服务</td>
+<td>主读写从只读</td>
+<td>读写</td>
+<td>读写</td>
+<td>读写</td>
+</tr>
+</tbody></table>
+<h3 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h3><blockquote>
+<p>HBase复制时，都是通过RegionServer开启复制线程进行HLog的发送，那么当其中某个RegionServer出现异常时，HBase是如何处理的？这里需要区别两种不同的情况，即Master上RegionServer异常和Slave上RegionServer异常。</p>
+</blockquote>
+<ol>
+<li>Slave上RegionServer异常</li>
+</ol>
+<p>对于该种异常HBase处理比较简单，Slave上出现某个RegionServer异常，该RegionServer直接会被标记为异常状态，后续所有的更新都不会被发送到该台RegionServer，Slave会重新选取一台RegionServer来接收这部分数据。</p>
+<ol start="2">
+<li>Master上RegionServer异常</li>
+</ol>
+<blockquote>
+<p>Master上RegionServer出现异常，由于HLog都是通过RegionServer开启复制线程进行发送，如果RegionServer出现异常，这个时候，属于该台RegionServer的HLog就没有相关处理线程，这个时候，这部分数据又该如何处理？</p>
+</blockquote>
+<p>Master上某台RegionServer异常，其他RegionServer会对该台RegionServer在zookeeper中的信息尝试加锁操作，当然这个操作是互斥的，同一时间只有一台RegionServer能获取到锁，然后，会把HLog信息拷贝到自己的目录下，这样就完成了异常RegionServer的HLog信息的转移，通过新的RegionServer把HLog的信息发送到Slave。</p>
+<p><img src="/images/image-20201223214128714.png" alt="image-20201223214128714"></p>
+<h2 id="详细底层架构"><a href="#详细底层架构" class="headerlink" title="详细底层架构"></a>详细底层架构</h2><p><img src="/images/clipboard-1605714905636.png" alt="img"></p>
+<ul>
+<li>HMaster：相当于HBase的大脑，当HRegionSrever中存储的数据表过大以后，HMaster通知HRegionSrever对表进行切割，实现集群的负载均衡，同时整个HBase的数据读写操作都是通过HMaster进行管理和通知的，当HRegionSrever故障失效时，HMaster负责此节点上所有数据的迁移。</li>
+<li>ZooKeeper：实现HBase的高可用，它保证集群中只有一个HMaster工作，同时还监视HRegionServer的工作状态，当HRegionServer处理客户端的数据读写出现异常时，ZooKeeper会通知HMaster进行处理。</li>
+<li>HRegionServer：是HBase的核心组件，负责执行HBase的所有数据读写操作，HRegionSrever包含了：HLog、HRegion、Store等组件。</li>
+<li>HRegion：是HRegionServer中存储数据的组件，<strong>一个HRegionServer对应一张数据表</strong>，数据表会被周期切分，所以一张完整的数据表可能会对应多个HRegion，而HRegion又由多个Store和HLog组成。</li>
+<li>Store：Store也是存储数据的核心组件，它内部包含Mem Store和StoreFile两个组件，前者以内存形式存储数据，后者以HDFS文件形式存储数据。</li>
+<li>Mem Store：是数据存储的首选方式，当内存空间满了后，HBase会将内存的数据一次性刷写到HDFS上，以文件形式存储，也就是StoreFile中，空间大小并不是刷写数据的唯一条件，当数据在内存中存储时间达到设定时间时，HBase也会进行数据刷写操作。</li>
+<li>StoreFile：是存储数据的文件形式，基于HDFS存储，StoreFile以HFile 的形式存储在HDFS 上。每个Store会有一个或多个StoreFile（HFile），数据在每个StoreFile中都是有序（局部有序）的。</li>
+<li>HLog：保证了HBase的可靠性，它记录HRegionSrever的数据读写等操作的编辑日志，当HRegionSrever发生故障时，HMaster接收到ZooKeeper的通知后，可以通过HLog对数据进行恢复。</li>
+<li>Meta表：用于保存集群中HRegions的位置信息（region列表）。ZooKeeper存储着Meta表的位置。</li>
+<li>HLog(WAL log)：WAL 意为Write ahead log，用于数据的容错和恢复，Hlog记录数据的所有变更，一旦数据修改，就可以从log中进行恢复，每个HRegionServer中都有一个HLog对象，HLog是一个实现Write Ahead Log的类，在每次用户操作写入MemStore的同时，也会写一份数据到HLog文件中，HLog文件定期会滚动出新的，并删除旧的文件（已持久化到StoreFile中的数据）。当HRegionServer意外终止后，HMaster会通过Zookeeper感知到，HMaster首先会处理遗留的 HLog文件，将其中不同Region的Log数据进行拆分，分别放到相应region的目录下，然后再将失效的region重新分配，领取到这些region的HRegionServer在Load Region的过程中，会发现有历史HLog需要处理，因此会Replay HLog中的数据到MemStore中，然后flush到StoreFiles，完成数据恢复。</li>
+</ul>
+<h2 id="写数据流程"><a href="#写数据流程" class="headerlink" title="写数据流程"></a>写数据流程</h2><p><img src="/images/clipboard-1605714925011.png" alt="img"></p>
+<ol>
+<li>Client 先访问zookeeper，获取hbase:meta 表位于哪个Region Server，meta表存储了用户表的region信息。</li>
+<li>访问对应的Region Server，获取hbase:meta 表，根据读请求的namespace:table/rowkey，查询出目标数据位于哪个Region Server 中的哪个Region 中，并将该table 的region 信息以及meta 表的位置信息缓存在客户端的meta cache，方便下次访问。</li>
+<li>与目标Region Server 进行通讯；</li>
+<li>将数据顺序写入（追加）到WAL；</li>
+<li>将数据写入对应的MemStore，数据会在MemStore 进行排序；</li>
+<li>向客户端发送ack；</li>
+<li>等达到MemStore 的刷写时机后，将数据刷写到HFile。</li>
+</ol>
+<h2 id="读流程"><a href="#读流程" class="headerlink" title="读流程"></a><strong>读流程</strong></h2><p><img src="/images/clipboard-1605714958544.png" alt="img"></p>
+<ol>
+<li>Client 先访问zookeeper，获取hbase:meta 表位于哪个Region Server。</li>
+<li>访问对应的Region Server，获取hbase:meta 表，根据读请求的namespace:table/rowkey，查询出目标数据位于哪个Region Server 中的哪个Region 中，并将该table 的region 信息以及meta 表的位置信息缓存在客户端的meta cache，方便下次访问。</li>
+<li>与目标Region Server 进行通讯；</li>
+<li>分别在Block Cache（读缓存），MemStore（写缓存） 和Store File（HFile）中查询目标数据，并将查到的所有数据进行合并。此处所有数据是指同一条数据的不同版本（time stamp）或者不同的类型（Put/Delete），先从memstore中找数据，如果没有再从BlockCache里面读，最后在StoreFile里面读取。</li>
+<li>将从文件中查询到的数据块（Block，HFile 数据存储单元，默认大小为64KB）缓存到Block Cache。</li>
+<li>将合并后的最终结果返回给客户端。</li>
+</ol>
+<h3 id="详细"><a href="#详细" class="headerlink" title="详细"></a>详细</h3><p><a target="_blank" rel="noopener" href="http://hbasefly.com/2016/12/21/hbase-getorscan/">http://hbasefly.com/2016/12/21/hbase-getorscan/</a></p>
+<p><a target="_blank" rel="noopener" href="http://hbasefly.com/2017/06/11/hbase-scan-2/">http://hbasefly.com/2017/06/11/hbase-scan-2/</a></p>
+<blockquote>
+<p>HBase中更新操作以及删除操作实现都很简单，更新操作并没有更新原有数据，而是使用时间戳属性实现了多版本。删除操作也并没有真正删除原有数据，只是插入了一条打上”deleted”标签的数据，而真正的数据删除发生在系统异步执行Major_Compact的时候</p>
+<p>整个HBase存储引擎基于LSM-Like树实现，因此一次范围查询可能会涉及多个分片、多块缓存甚至多个数据存储文件</p>
+<p>这种实现套路大大简化了数据更新、删除流程，但是在读取过程需要根据版本进行过滤，同时对已经标记删除的数据也要进行过滤</p>
+</blockquote>
+<h4 id="Client-Server交互逻辑"><a href="#Client-Server交互逻辑" class="headerlink" title="Client-Server交互逻辑"></a><strong>Client-Server交互逻辑</strong></h4><p><img src="/images/795841.png" alt="795841"></p>
+<ol>
+<li>根据配置的Zookeeper地址连接zk，读取/&lt;hbase-rootdir&gt;/meta-region-server节点信息，获取Hbase元数据表（meta表）的regionServer地址及访问端口</li>
+<li>从对应的RegionServer上加载meta表到内存中，检索rowkey所在RegionServer信息</li>
+<li>根据数据所在RegionServer的访问信息，客户端会向该RegionServer发送真正的数据读取请求。服务器端接收到该请求之后需要进行复杂的处理</li>
+</ol>
+<blockquote>
+<p>总结</p>
+</blockquote>
+<ol>
+<li>客户端只需要配置zookeeper的访问地址以及根目录，就可以进行正常的读写请求。不需要配置集群的RegionServer地址列表。</li>
+<li>客户端会将hbase:meta元数据表缓存在本地，因此上述步骤中前两步只会在客户端第一次请求的时候发生，之后所有请求都直接从缓存中加载元数据。如果集群发生某些变化导致hbase:meta元数据更改，客户端再根据本地元数据表请求的时候就会发生异常，此时客户端需要重新加载一份最新的元数据表到本地</li>
+</ol>
+<h4 id="读取数据"><a href="#读取数据" class="headerlink" title="读取数据"></a>读取数据</h4><blockquote>
+<p>scanner体系的核心在于三层scanner：RegionScanner、StoreScanner以及StoreFileScanner。三者是层级的关系，<strong>一个RegionScanner由多个StoreScanner构成，一张表由多个列族组成，就有多少个StoreScanner负责该列族的数据扫描。一个StoreScanner又是由多个StoreFileScanner组成。每个Store的数据由内存中的MemStore和磁盘上的StoreFile文件组成，相对应的，StoreScanner对象会雇佣一个MemStoreScanner和N个StoreFileScanner来进行实际的数据读取，每个StoreFile文件对应一个StoreFileScanner</strong>，注意：StoreFileScanner和MemstoreScanner是整个scan的最终执行者</p>
+</blockquote>
+<p><img src="/images/818160.png" alt="818160"></p>
+<blockquote>
+<p>RegionScanner会根据列族构建StoreScanner，有多少列族就构建多少StoreScanner，用于负责该列族的数据检索</p>
+</blockquote>
+<p><img src="/images/image-20210112222043012.png" alt="image-20210112222043012"></p>
+<ol>
+<li><p>构建StoreFileScanner：每个StoreScanner会为当前该Store中每个HFile构造一个StoreFileScanner，用于实际执行对应文件的检索。同时会为对应Memstore构造一个MemstoreScanner，用于执行该Store中Memstore的数据检索。该步骤对应于监工在人才市场招募建楼所需的各种类型工匠。</p>
+</li>
+<li><p>过滤淘汰StoreFileScanner：<strong>根据Time Range以及RowKey Range</strong>对StoreFileScanner以及MemstoreScanner进行过滤，淘汰肯定不存在待检索结果的Scanner。上图中StoreFile3因为检查RowKeyRange不存在待检索Rowkey所以被淘汰</p>
+</li>
+<li><p>Seek rowkey：所有StoreFileScanner开始做准备工作，在负责的HFile中定位到满足条件的起始Row。工匠也开始准备自己的建造工具，建造材料，找到自己的工作地点，等待一声命下。就像所有重要项目的准备工作都很核心一样，Seek过程（此处略过Lazy Seek优化）也是一个很核心的步骤，它主要包含下面三步：</p>
+<ul>
+<li>定位Block Offset：在Blockcache中读取该HFile的索引树结构，根据索引树检索对应RowKey所在的Block Offset和Block Size</li>
+<li>Load Block：根据BlockOffset首先在BlockCache中查找Data Block，如果不在缓存，再在HFile中加载</li>
+<li>Seek Key：在Data Block内部通过二分查找的方式定位具体的RowKey</li>
+</ul>
+</li>
+<li><p>StoreScanner合并构建最小堆：将该Store中所有StoreFileScanner和MemstoreScanner合并形成一个heap（最小堆），所谓heap是一个优先级队列，队列中元素是所有scanner，<strong>排序规则按照scanner seek到的key/value大小由小到大进行排序</strong>。</p>
+<blockquote>
+<p>这里需要重点关注三个问题，首先为什么这些Scanner需要由小到大排序，其次keyvalue是什么样的结构，最后，keyvalue谁大谁小是如何确定的：</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>为什么这些Scanner需要由小到大排序？</p>
+<blockquote>
+<p>HBase支持数据多版本，假设用户只想获取最新版本，那只需要将这些数据由最新到最旧进行排序，然后取队首元素返回就可以。那么，如果不排序，就只能遍历所有元素，查看符不符合用户查询条件。这就是排队的意义。</p>
+</blockquote>
+<p>HBase中KeyValue的结构</p>
+<blockquote>
+<p>HBase中KeyValue并不是简单的KV数据对，而是一个具有复杂元素的结构体，其中Key由RowKey，ColumnFamily，Qualifier ，TimeStamp，KeyType等多部分组成，Value是一个简单的二进制数据。Key中元素KeyType表示该KeyValue的类型，取值分别为Put/Delete/Delete Column/Delete Family等。KeyValue可以表示为如下图所示：</p>
+<p><img src="/images/image-20210112220127991.png" alt="image-20210112220127991"></p>
+</blockquote>
+<p>不同KeyValue之间如何进行大小比较？</p>
+<blockquote>
+<p>上文提到KeyValue中Key由RowKey，ColumnFamily，Qualifier ，TimeStamp，KeyType等5部分组成，HBase设定Key大小首先比较RowKey，RowKey越小Key就越小；RowKey如果相同就看CF，CF越小Key越小；CF如果相同看Qualifier，Qualifier越小Key越小；Qualifier如果相同再看Timestamp，Timestamp越大表示时间越新，对应的Key越小。如果Timestamp还相同，就看KeyType，KeyType按照DeleteFamily -&gt; DeleteColumn -&gt; Delete -&gt; Put 顺序依次对应的Key越来越大。</p>
+<p>查看源码org.apache.hadoop.hbase.KeyValue，如下图。没办法，源码就是这么写的，这样写最终的目的就是因为 StoreFileScanner 合并为最小堆，而最新的版本Timestamp大，但是比较起key却比旧的小，所以可以放到最顶层。所以，提取的时候可以取到最新的。</p>
+<p><img src="/images/20200516184905613.png" alt="img"></p>
+</blockquote>
+<p>常说HBase数据读取要读Memstore、HFile和Blockcache，为什么上面Scanner只有StoreFileScanner和MemstoreScanner两种？没有BlockcacheScanner?</p>
+<blockquote>
+<p>HBase中数据仅仅独立地存在于Memstore和StoreFile中，Blockcache中的数据只是StoreFile中的部分数据（热点数据），即所有存在于Blockcache的数据必然存在于StoreFile中。因此MemstoreScanner和StoreFileScanner就可以覆盖到所有数据。实际读取时StoreFileScanner通过索引定位到待查找key所在的block之后，首先检查该block是否存在于Blockcache中，如果存在直接取出，如果不存在再到对应的StoreFile中读取。</p>
+</blockquote>
+<p>数据更新操作先将数据写入Memstore，再落盘。落盘之后需不需要更新Blockcache中对应的kv？如果不更新，会不会读到脏数据？</p>
+<blockquote>
+<p>如果理清楚了第一个问题，相信很容易得出这个答案：不需要更新Blockcache中对应的kv，而且不会读到脏数据。数据写入Memstore落盘会形成新的文件，和Blockcache里面的数据是相互独立的，以多版本的方式存在。</p>
+</blockquote>
+<h2 id="HLog"><a href="#HLog" class="headerlink" title="HLog"></a>HLog</h2><p>HBase中，WAL的实现类为HLog，每个Region Server拥有一个HLog日志，所有region的写入都是写到同一个HLog。下图表示同一个Region Server中的3个 region 共享一个HLog。当数据写入时，是将数据对&lt;HLogKey,WALEdit&gt;按照顺序追加到HLog 中，以获取最好的写入性能</p>
+<p><img src="/images/11.png" alt="11"></p>
+<p>上图中HLogKey主要存储了log sequence number，更新时间 write time，region name，表名table name以及cluster ids。其中log seq num是HFile的一个重要的元数据和HLog的生命周期息息相关；region name和table name分别表征该段日志属于哪个region以及哪张表；cluster ids用于将日志复制到集群中其他机器上</p>
+<ol>
+<li> 每个RegionServer拥有一个或多个HLog（默认只有1个，1.x版本可以开启<a target="_blank" rel="noopener" href="http://hbase.apache.org/book.html#_multiwal">MultiWAL</a>功能，允许多个HLog）。每个HLog是多个Region共享的，如图所示，Region A、Region B和Region C共享一个HLog文件。</li>
+<li>HLog中日志单元WALEntry表示一次行级更新的最小追加单元（图中红色/黄色小方框），它由两部分组成：HLogKey和WALEdit，HLogKey中包含多个属性信息，包含table name、region name、sequenceid等；WALEdit用来表示一个事务中的更新集合，一次行级事务可以原子操作同一行中的多个列。上图中WALEdit包含多个KeyValue。</li>
+</ol>
+<h3 id="sequenceid"><a href="#sequenceid" class="headerlink" title="sequenceid"></a><strong>sequenceid</strong></h3><ol>
+<li>sequenceid是自增序号。很好理解，就是随着时间推移不断自增，不会减小。</li>
+<li>sequenceid是一次行级事务的自增序号。行级事务是什么？简单点说，就是更新一行中的多个列族、多个列，行级事务能够保证这次更新的原子性、一致性、持久性以及设置的隔离性，HBase会为一次行级事务分配一个自增序号。</li>
+<li>sequenceid是region级别的自增序号。每个region都维护属于自己的sequenceid，不同region的sequenceid相互独立。</li>
+</ol>
+<p>在这样的定义条件下，HLog就会如下图所示：</p>
+<p><img src="/images/12.png" alt="12"></p>
+<p>HLog中有两个Region的日志记录，方框中的数字表示sequenceid，随着时间的推移，每个region的sequenceid都独立自增。</p>
+<h3 id="问题-1"><a href="#问题-1" class="headerlink" title="问题"></a>问题</h3><blockquote>
+<p><strong>hbase中flush操作是region级别操作，即每次执行flush都需要整个region中的所有store全都执行flush</strong></p>
+</blockquote>
+<h4 id="HLog在什么时候可以过期回收？"><a href="#HLog在什么时候可以过期回收？" class="headerlink" title="HLog在什么时候可以过期回收？"></a><strong>HLog在什么时候可以过期回收？</strong></h4><p>单个Hlog大小达到一定阈值就会自动切分成一个个Hlog文件，什么时候回收删除这些log文件</p>
+<p>当log文件的所有region对应的最大sequenceid已经落盘（变成Hfile）就可删除，如下图RegionA对应的最大sequenceid（5）已经落盘，RegionB对应的最大sequenceid（5）也已经落盘，这和Hlog就可以被删除</p>
+<p><img src="/images/13.png" alt="13"></p>
+<p> RegionServer会为每个Region维护了一个变量oldestUnflushedSequenceId（实际上是为每个Store，为了方便说明，此处暂且认为是Region，不影响原理），表示这个Region最早的还未落盘的seqid ，即这个seqid之前的所有数据都已经落盘。接下来看看这个值在flush的时候是怎么维护的，以及如何用这个值实现HLog的过期回收判断。</p>
+<p>下图是flush过程中oldestUnflushedSequenceId变量变化的示意图，初始时为null，假设在某一时刻阶段二RegionA(红色方框)要执行flush，中间HLog中sequenceId为1~4对应的数据将会落盘，<strong>在执行flush之前，HBase会append一个空的Entry到HLog，仅为获取下一个sequenceId(5)，并将这个sequenceId赋给OldestUnflushedSequenceId-RegionA</strong>。如图中第三阶段OldestUnflushedSequenceId-RegionA指向sequenceId为5的Entry。</p>
+<p><img src="/images/14.png" alt="14"></p>
+<p>每次flush之后这个变量就会往前移动一段距离。这个变量至关重要，是解决文初提到的三个问题的关键。基于上述对这个变量的理解，来看看下面两种场景下右侧HLog是否可以删除：</p>
+<p><img src="/images/15.png" alt="15"></p>
+<p>很显然，场景一中右侧HLog还有未落盘的数据（sequenceid=5还未落盘），因此不能删除；而场景二中右侧HLog的所有数据都已经落盘，所以这个HLog理论上就已经可以被删除回收。</p>
+<h4 id="HLog数量超过阈值-maxlogs-之后删除最早HLog，应该强制刷新哪些Region"><a href="#HLog数量超过阈值-maxlogs-之后删除最早HLog，应该强制刷新哪些Region" class="headerlink" title="HLog数量超过阈值(maxlogs)之后删除最早HLog，应该强制刷新哪些Region"></a><strong>HLog数量超过阈值(maxlogs)之后删除最早HLog，应该强制刷新哪些Region</strong></h4><p>假设当前系统设置了HLog的最大数量为32，即hbase.regionserver.maxlogs=32，上图中最左侧HLog是第33个，此时系统会获取到最老的日志（最右侧HLog），并检查所有的Entry对应的数据是否都已经落盘，如图所示RegionC还有部分数据没有落地，为了安全删除这个HLog就必须强制对本HLog中多个Region执行flush操作，将所有数据落盘。</p>
+<p><img src="/images/16.png" alt="16"></p>
+<h2 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h2><p>RegionServer的region数目取决于memstore的内存使用，每个region拥有一组memstore（memstore的数量由hstore决定，hstore的数据由创建表时的指定的列族个数决定，所以每个region的memstore的个数 = 表的列族的个数 ），可以通过配置来修改memstore占用内存的大小，一般设置在 128 M – 256M之间</p>
+<p><strong>Region是Hbase分布式存储的最小单元，也是集群负载均衡的最小单元</strong></p>
+<ul>
+<li>一个Region Server上可以维护多个region     √</li>
+<li>一个region可以分布在多台Region Server上   ×</li>
+</ul>
+<blockquote>
+<p>对于生产场景中大表，最大的region大小主要是受compactions 的限制，大量大HFile的compact会降低群集性能。目前，该建议的最大region大小为10-20GB，而5-10GB是最优</p>
+</blockquote>
+<h3 id="Region-Split"><a href="#Region-Split" class="headerlink" title="Region Split"></a><strong>Region Split</strong></h3><blockquote>
+<p>Region自动切分是HBase能够拥有良好扩张性的最重要因素之一，也必然是所有分布式系统追求无限扩展性的一副良药</p>
+<p>Region按照行切分</p>
+</blockquote>
+<p>默认情况下，每个Table 起初只有一个Region，随着数据的不断写入，Region 会自动进行拆分。刚拆分时，两个子Region 都位于当前的Region Server，但处于负载均衡的考虑，HMaster 有可能会将某个Region 转移给其他的Region Server。</p>
+<p><strong>Region Split 时机</strong></p>
+<ul>
+<li>当1 个region 中的某个Store 下所有StoreFile 的总大小超过hbase.hregion.max.filesize，该Region 就会进行拆分（0.94 版本之前）</li>
+<li>当1 个region 中的某个Store 下所有StoreFile 的总大小超过Min(R^2 *</li>
+</ul>
+<p>hbase.hregion.memstore.flush.size,hbase.hregion.max.filesize)，该Region 就会进行拆分，其中R 为当前Region Server 中属于该Table 的region个数（0.94 版本之后）</p>
+<p><img src="/images/clipboard-1605178131266.png" alt="img"></p>
+<h3 id="split过程"><a href="#split过程" class="headerlink" title="split过程"></a>split过程</h3><blockquote>
+<p>region切分策略会触发region切分，切分开始之后的第一件事是寻找切分点－splitpoint。所有默认切分策略，无论是ConstantSizeRegionSplitPolicy、<a target="_blank" rel="noopener" href="http://hbase.apache.org/devapidocs/org/apache/hadoop/hbase/regionserver/IncreasingToUpperBoundRegionSplitPolicy.html">IncreasingToUpperBoundRegionSplitPolicy</a>抑或是SteppingSplitPolicy，对于切分点的定义都是一致的。当然，用户手动执行切分时是可以指定切分点进行切分的</p>
+</blockquote>
+<p>HBase将整个切分过程包装成了一个事务，意图能够保证切分事务的原子性。整个分裂事务过程分为三个阶段：prepare – execute – (rollback) ，操作模版如下：</p>
+<p><img src="/images/image-20210113160515023.png" alt="image-20210113160515023"></p>
+<ul>
+<li><p>prepare阶段：在内存中初始化两个子region，具体是生成两个HRegionInfo对象，包含tableName、regionName、startkey、endkey等。同时会生成一个transaction journal，这个对象用来记录切分的进展，具体见rollback阶段</p>
+</li>
+<li><p>execute阶段：切分的核心操作。见下图（来自<a target="_blank" rel="noopener" href="http://zh.hortonworks.com/blog/apache-hbase-region-splitting-and-merging/">Hortonworks</a>）：</p>
+<p><img src="/images/image-20210113160617616.png" alt="image-20210113160617616"></p>
+<ol>
+<li><p>regionserver 更改ZK节点 /region-in-transition 中该region的状态为SPLITING。</p>
+</li>
+<li><p>master通过watch节点/region-in-transition检测到region状态改变，并修改内存中region的状态，在master页面RIT模块就可以看到region执行split的状态信息。</p>
+</li>
+<li><p>在父存储目录下新建临时文件夹，split保存split后的daughter region信息</p>
+</li>
+<li><p>关闭parent region：parent region关闭数据写入并触发flush操作，将写入region的数据全部持久化到磁盘。此后短时间内客户端落在父region上的请求都会抛出异常NotServingRegionException</p>
+</li>
+<li><p>核心分裂步骤：在.split文件夹下新建两个子文件夹，称之为daughter A、daughter B，并在文件夹中生成reference文件，分别指向父region中对应文件。这个步骤是所有步骤中最核心的一个环节，生成reference文件日志如下所示：</p>
+<pre class="line-numbers language-none"><code class="language-none">2017-08-12 11:53:38,158 DEBUG [StoreOpener-0155388346c3c919d3f05d7188e885e0-1] regionserver.StoreFileInfo: reference &#39;hdfs:&#x2F;&#x2F;hdfscluster&#x2F;hbase-rsgroup&#x2F;data&#x2F;default&#x2F;music&#x2F;0155388346c3c919d3f05d7188e885e0&#x2F;cf&#x2F;d24415c4fb44427b8f698143e5c4d9dc.00bb6239169411e4d0ecb6ddfdbacf66&#39; to region&#x3D;00bb6239169411e4d0ecb6ddfdbacf66 hfile&#x3D;d24415c4fb44427b8f698143e5c4d9dc。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>父region分裂为两个子region后，将daughter A、daughter B拷贝到HBase根目录下，形成两个新的region</p>
+</li>
+<li><p> parent region通知修改 hbase.meta 表后下线，不再提供服务。下线后parent region在meta表中的信息并不会马上删除，而是标注split列、offline列为true，并记录两个子region</p>
+</li>
+</ol>
+<p>   <img src="/images/image-20210113161514884.png" alt="image-20210113161514884"></p>
+<ol start="8">
+<li>开启daughter A、daughter B两个子region。通知修改 hbase.meta 表，正式对外提供服务。</li>
+</ol>
+</li>
+</ul>
+<h2 id="BlockCache"><a href="#BlockCache" class="headerlink" title="BlockCache"></a>BlockCache</h2><blockquote>
+<p>HBase在实现中提供了两种缓存结构：MemStore和BlockCache。其中MemStore称为写缓存，HBase执行写操作首先会将数据写入MemStore，并顺序写入HLog，等满足一定条件后统一将MemStore中数据刷新到磁盘，这种设计可以极大地提升HBase的写性能。不仅如此，MemStore对于读性能也至关重要，假如没有MemStore，读取刚写入的数据就需要从文件中通过IO查找，这种代价显然是昂贵的！BlockCache称为读缓存，HBase会将一次文件查找的Block块缓存到Cache中，以便后续同一请求或者邻近数据查找请求，可以直接从内存中获取，避免昂贵的IO操作</p>
+</blockquote>
+<h3 id="block"><a href="#block" class="headerlink" title="block"></a>block</h3><p>Block是HBase中最小的数据存储单元，默认为64K，在建表语句中可以通过参数BlockSize指定。HBase中Block分为四种类型：Data Block，Index Block，Bloom Block和Meta Block。其中Data Block用于存储实际数据，通常情况下每个Data Block可以存放多条KeyValue数据对；Index Block和Bloom Block都用于优化随机读的查找路径，其中Index Block通过存储索引数据加快数据查找，而Bloom Block通过一定算法可以过滤掉部分一定不存在待查KeyValue的数据文件，减少不必要的IO操作；Meta Block主要存储整个HFile的元数据</p>
+<h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>BlockCache是Region Server级别的，一个Region Server只有一个Block Cache，在Region Server启动的时候完成Block Cache的初始化工作。到目前为止，HBase先后实现了3种Block Cache方案，LRUBlockCache是最初的实现方案，也是默认的实现方案；HBase 0.92版本实现了第二种方案SlabCache，见<a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/HBASE-4027">HBASE-4027</a>；HBase 0.96之后官方提供了另一种可选方案BucketCache，见<a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/HBASE-7404">HBASE-7404</a>。</p>
+<blockquote>
+<p>LRUBlockCache是将所有数据都放入JVM Heap中，交给JVM进行管理。而后两者采用了不同机制将部分数据存储在堆外，交给HBase自己管理。这种演变过程是因为LRUBlockCache方案中JVM垃圾回收机制经常会导致程序长时间暂停，而采用堆外内存对数据进行管理可以有效避免这种情况发生</p>
+</blockquote>
+<h3 id="LRUBlockCache"><a href="#LRUBlockCache" class="headerlink" title="LRUBlockCache"></a><strong>LRUBlockCache</strong></h3><p>HBase默认的BlockCache实现方案。Block数据块都存储在 JVM heap内，由JVM进行垃圾回收管理。它将内存从逻辑上分为了三块：single-access区、mutil-access区、in-memory区，分别占到整个BlockCache大小的25%、50%、25%。一次随机读中，一个Block块从HDFS中加载出来之后首先放入signle区，后续如果有多次请求访问到这块数据的话，就会将这块数据移到mutil-access区。而in-memory区表示数据可以常驻内存，一般用来存放访问频繁、数据量小的数据，比如元数据，用户也可以在建表的时候通过设置列族属性IN-MEMORY= true将此列族放入in-memory区。很显然，这种设计策略类似于JVM中young区、old区以及perm区。无论哪个区，系统都会采用严格的Least-Recently-Used算法，当BlockCache总量达到一定阈值之后就会启动淘汰机制，最少使用的Block会被置换出来，为新加载的Block预留空间</p>
+<h3 id="SlabCache"><a href="#SlabCache" class="headerlink" title="SlabCache"></a><strong>SlabCache</strong></h3><p>为了解决LRUBlockCache方案中因为JVM垃圾回收导致的服务中断，SlabCache方案使用Java NIO DirectByteBuffer技术实现了堆外内存存储，不再由JVM管理数据内存。</p>
+<p>默认情况下，系统在初始化的时候会分配两个缓存区，分别占整个BlockCache大小的80%和20%，每个缓存区分别存储固定大小的Block块，其中前者主要存储小于等于64K大小的Block，后者存储小于等于128K Block，如果一个Block太大就会导致两个区都无法缓存。</p>
+<p>和LRUBlockCache相同，SlabCache也使用Least-Recently-Used算法对过期Block进行淘汰。和LRUBlockCache不同的是，SlabCache淘汰Block的时候只需要将对应的bufferbyte标记为空闲，后续cache对其上的内存直接进行覆盖即可。</p>
+<blockquote>
+<p>默认只能存储两种固定大小Block的SlabCache方案不能满足部分用户场景，比如用户设置BlockSize = 256K，简单使用SlabCache方案就不能达到这部分Block缓存的目的。因此HBase实际实现中将SlabCache和LRUBlockCache搭配使用，称为DoubleBlockCache。一次随机读中，一个Block块从HDFS中加载出来之后会在两个Cache中分别存储一份；缓存读时首先在LRUBlockCache中查找，如果Cache Miss再在SlabCache中查找，此时如果命中再将该Block放入LRUBlockCache中。</p>
+<p>经过实际测试，DoubleBlockCache方案有很多弊端。比如SlabCache设计中固定大小内存设置会导致实际内存使用率比较低，而且使用LRUBlockCache缓存Block依然会因为JVM GC产生大量内存碎片。因此在HBase 0.98版本之后，该方案已经被不建议使用</p>
+</blockquote>
+<h3 id="BucketCache"><a href="#BucketCache" class="headerlink" title="BucketCache"></a><strong>BucketCache</strong></h3><p>SlabCache方案在实际应用中并没有很大程度改善原有LRUBlockCache方案的GC弊端，还额外引入了诸如堆外内存使用率低的缺陷。然而它的设计并不是一无是处，至少在使用堆外内存这个方面给予了阿里大牛们很多启发。站在SlabCache的肩膀上，他们开发了BucketCache缓存方案并贡献给了社区。</p>
+<p>BucketCache通过配置可以工作在三种模式下：heap，offheap和file。无论工作在那种模式下，BucketCache都会申请许多带有固定大小标签的Bucket，和SlabCache一样，一种Bucket存储一种指定BlockSize的数据块，但和SlabCache不同的是，BucketCache会在初始化的时候申请14个不同大小的Bucket，而且即使在某一种Bucket空间不足的情况下，系统也会从其他Bucket空间借用内存使用，不会出现内存使用率低的情况。</p>
+<p>heap模式表示这些Bucket是从JVM Heap中申请，offheap模式使用DirectByteBuffer技术实现堆外内存存储管理，而file模式使用类似SSD的高速缓存文件存储数据块。</p>
+<h3 id="CombinedBlockCache"><a href="#CombinedBlockCache" class="headerlink" title="CombinedBlockCache"></a>CombinedBlockCache</h3><p>实际实现中，HBase将BucketCache和LRUBlockCache搭配使用，称为CombinedBlockCache。和DoubleBlockCache不同，系统在LRUBlockCache中主要存储Index Block和Bloom Block，而将Data Block存储在BucketCache中。</p>
+<p>因此一次随机读需要首先在LRUBlockCache中查到对应的Index Block，然后再到BucketCache查找对应数据块。BucketCache通过更加合理的设计修正了SlabCache的弊端，极大降低了JVM GC对业务请求的实际影响，但也存在一些问题，比如使用堆外内存会存在拷贝内存的问题，一定程度上会影响读写性能。当然，在后来的版本中这个问题也得到了解决，见<a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/HBASE-11425">HBASE-11425</a>。</p>
+<h2 id="MemStore"><a href="#MemStore" class="headerlink" title="MemStore"></a>MemStore</h2><blockquote>
+<p>Hbase Memstore的实现模型是SkipList（跳表），实现高效的查询/写入/删除操作</p>
+</blockquote>
+<h3 id="LSM-Tree模型"><a href="#LSM-Tree模型" class="headerlink" title="LSM- Tree模型"></a>LSM- Tree模型</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yunhaohan/article/details/112339081">https://blog.csdn.net/yunhaohan/article/details/112339081</a></p>
+<p><img src="/images/fba373212b35b780c7074c5964428cc5.png" alt="img"></p>
+<ul>
+<li><p>Mem Table：内存中的数据，用于保存最新的数据，按照key有序存储数据，存储方式没有明确定义，在Hbase中采用跳表来保存这些有序key</p>
+<blockquote>
+<p>数据保存在内存，有风险，所以会通过WAL（Write Ahead Log，预写日志的方式）来保证数据可靠性</p>
+</blockquote>
+</li>
+<li><p>Immutable MemTable：Mem Table达到一定大小，会转换成Immutable MemTable，它是Mem Table转变成SSTable的中间状态，写操作由Mem Table处理，转存过程不阻塞任何数据更新操作</p>
+</li>
+<li><p>SSTable（Sorted String Table）：有序键值对，是LSM树在磁盘中的结构，为了加快SSTbale读取，可以加入索引和布隆过滤器加快查询</p>
+</li>
+</ul>
+<blockquote>
+<p>LSM会将所有数据的插入、更新、删除等操作记录**(注意是操作记录)<strong>写入内存，当达到一定数量再写入磁盘，</strong>与B+树不同，B+树数据更新会直接修改数据，但是LSM的数据更新是日志形式**，当要追加时是直接apend一条更新记录完成，这样设计可以实现顺序读写，不断将Immutable MemTable flush到持久化存储即可，而不用去修改之前的SSTable中的key，保证了顺序写</p>
+<p>当MemTable达到一定大小flush到持久化存储变成SSTable，在不同的SSTable中，可能存在相同的key记录，只需要取出最新的记录即可</p>
+</blockquote>
+<p>问题：</p>
+<ol>
+<li>冗余存储：对于一个Key，除了最新的一条记录，其他记录都是冗余的，但是仍旧占用了空间，所以需要Compact合并多个SSTable</li>
+<li>读取的时候，会从最新的开始倒序读取，直到找到某个key，最差的情况是要遍历整个SSTable</li>
+</ol>
+<h4 id="LSM-Compact"><a href="#LSM-Compact" class="headerlink" title="LSM Compact"></a>LSM Compact</h4><blockquote>
+<p>compact操作由两张策略： <strong>size-tiered</strong>，<strong>leveled</strong></p>
+</blockquote>
+<p>size-tiered策略保证每层SSTable的大小相近，同时限制每一层SSTable的数量。每层限制SSTable为N，当每层SSTable达到N后，则触发Compact操作合并这些SSTable，并将合并后的结果写入到下一层成为一个更大的sstable，所以当层数达到一定数量级，最底层的SSTable会特别大，对于同一层的SSTable，每个key的记录是可能存在多份的，只有当该层的SSTable执行compact操作才会消除这些key的冗余记录</p>
+<h2 id="MemStore-Flush"><a href="#MemStore-Flush" class="headerlink" title="MemStore Flush"></a>MemStore Flush</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhangshenghang/article/details/82745205">https://blog.csdn.net/zhangshenghang/article/details/82745205</a></p>
+<p><img src="/images/clipboard-1605178131298.png" alt="img"></p>
+<blockquote>
+<p>HBase是基于LSM-Tree模型，所有的数据更新插入操作都首先写入Memstore中（同时会顺序写到日志HLog中），达到指定大小之后再将这些修改操作批量写入磁盘，生成一个新的HFile文件，这种设计可以极大地提升HBase的写性能；</p>
+<p>HBase为了方便按照RowKey进行检索，要求HFile中数据都按照RowKey进行排序，Memstore数据在flush为HFile之前会进行一次排序（快排），将数据有序化；根据局部性原理，新写入的数据会更大概率被读取，因此HBase在读取数据的时候首先检查请求的数据是否在Memstore（写缓存），Memstore未命中的话再到读缓存中查找，读缓存还未命中才会到HFile文件中查找，最终返回merged的一个结果给用户。</p>
+<p>Memstore对HBase的写入性能和读取性能都至关重要，flush操作又是Memstore最核心的操作</p>
+</blockquote>
+<p>MemStore 刷写时机：</p>
+<blockquote>
+<p><strong>当一个MemStore进行flush，则它所在region的所有MemStore都有进行flush</strong></p>
+</blockquote>
+<ol>
+<li><p>hbase.hregion.memstore.flush.size</p>
+<p>默认值 128M，单个 MemStore 大小超过该阈值就会触发 Flush。如果当前集群 Flush 比较频繁，并且内存资源比较充裕，建议适当调整为 256M。调大的副作用可能是造成宕机时需要分裂的 HLog 数量变多，从而延长故障恢复时间。</p>
+</li>
+<li><p>hbase.hregion.memstore.block.multiplier</p>
+<p>默认值 4，<strong>Region 中所有 MemStore 的总和超过单个 MemStore 大小的倍数达到该参数值时，就会阻塞（block）所有写请求并强制 Flush</strong>。一般不建议调整，但对于写入过快且内存充裕的场景，为避免写阻塞，可以适当调整到5~8</p>
+</li>
+<li><p>hbase.regionserver.global.memstore.size</p>
+<p>默认值 0.4**，RegionServer 中所有 MemStore 大小总和最多占 RegionServer 堆内存的 40%**，这是写缓存的总比例，可以根据实际场景适当调整，且要与 HBase 读缓存参数 hfile.block.cache.size（默认也是0.4）配合调整。旧版本参数名称为 hbase.regionserver.global.memstore.upperLimit。</p>
+</li>
+<li><p>hbase.regionserver.global.memstore.size.lower.limit</p>
+<p>默认值 0.95，表示 <strong>RegionServer 中所有 MemStore 大小的低水位是 hbase.regionserver.global.memstore.size 的 95%，超过该比例就会强制 Flush</strong>。一般不建议调整。旧版本参数名称为 hbase.regionserver.global.memstore.lowerLimit</p>
+</li>
+<li><p>hbase.regionserver.optionalcacheflushinterval</p>
+<p><strong>默认值 3600000（即 1 小时），HBase 定期 Flush 所有 MemStore 的时间间隔。一般建议调大，比如 10 小时，因为很多场景下 1 小时 Flush 一次会产生很多小文件，一方面导致 Flush 比较频繁，另一方面导致小文件很多，影响随机读性能，建议设置较大值</strong>。</p>
+</li>
+</ol>
+<h3 id="Memstore-Flush流程"><a href="#Memstore-Flush流程" class="headerlink" title="Memstore Flush流程"></a><strong>Memstore Flush流程</strong></h3><p>为了减少flush过程对读写的影响，HBase采用了类似于两阶段提交的方式，将整个flush过程分为三个阶段：</p>
+<ol>
+<li>prepare阶段：遍历当前Region中的所有Memstore，将Memstore中当前数据集kvset做一个快照snapshot，然后再新建一个新的kvset，后期的所有写入操作都会写入新的kvset中，而整个flush阶段读操作会首先分别遍历kvset和snapshot，如果查找不到再会到HFile中查找。<strong>prepare阶段需要加一把updateLock对写请求阻塞</strong>，结束之后会释放该锁。因为此阶段没有任何费时操作，因此持锁时间很短。</li>
+<li>flush阶段：遍历所有Memstore，将prepare阶段生成的snapshot持久化为临时文件，临时文件会统一放到目录.tmp下。这个过程因为涉及到磁盘IO操作，因此相对比较耗时。</li>
+<li>commit阶段：遍历所有的Memstore，将flush阶段生成的临时文件移到指定的ColumnFamily目录下，针对HFile生成对应的storefile和Reader，把storefile添加到HStore的storefiles列表中，最后再清空prepare阶段生成的snapshot</li>
+</ol>
+<h2 id="StoreFile（HFile）-Compaction"><a href="#StoreFile（HFile）-Compaction" class="headerlink" title="StoreFile（HFile） Compaction"></a>StoreFile（HFile） Compaction</h2><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1488439">https://cloud.tencent.com/developer/article/1488439</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011598442/article/details/90632702">https://blog.csdn.net/u011598442/article/details/90632702</a></p>
+<p>由于memstore 每次刷写都会生成一个新的HFile，且同一个字段的不同版本（timestamp）和不同类型（Put/Delete）有可能会分布在不同的HFile 中，因此查询时需要遍历所有的HFile。为了减少HFile 的个数，以及清理掉过期和删除的数据，会进行StoreFile Compaction。</p>
+<p>Compaction 分为两种，分别是Minor Compaction 和Major Compaction。</p>
+<p><strong>Minor Compaction会将临近的若干个较小的HFile 合并成一个较大的HFile，但不会清理过期和删除的数据。</strong></p>
+<p><strong>Major Compaction 会将一个Store 下的所有的HFile 合并成一个大HFile，并且会清理掉过期和删除的数据。</strong></p>
+<ul>
+<li>Minor Compaction：指选取一些小的、相邻的StoreFile将他们合并成一个更大的StoreFile，在这个过程中不会处理已经Deleted或Expired的Cell，一次 Minor Compaction 的结果是更少并且更大的StoreFile</li>
+<li>Major Compaction：指将所有的StoreFile合并成一个StoreFile，这个过程会清理三类没有意义的数据：被删除的数据、TTL过期数据、版本号超过设定版本号的数据。另外，一般情况下，major compaction时间会持续比较长，整个过程会消耗大量系统资源，对上层业务有比较大的影响。<strong>线上业务都会将关闭自动触发major compaction功能，改为手动在业务低峰期触发</strong></li>
+</ul>
+<p><img src="/images/20190528091325628.png" alt="img"></p>
+<blockquote>
+<p>触发compaction的方式有三种：Memstore刷盘、后台线程周期性检查、手动触发。****</p>
+</blockquote>
+<ul>
+<li>memstore flush：compaction的根源就在于flush，memstore 达到一定阈值或其他条件时就会触发flush刷写到磁盘生成HFile文件，因为HFile文件越来越多，这才需要compact。HBase每次flush之后，都会判断是否要进行compaction，一旦满足minor compaction或major compaction的条件便会触发执行。</li>
+<li>后台线程周期性检查： 后台线程 CompactionChecker 会定期检查是否需要执行compaction，检查周期为hbase.server.thread.wakefrequency*hbase.server.compactchecker.interval.multiplier，这里主要考虑的是一段时间内没有写入请求仍然需要做compact检查。其中参数 hbase.server.thread.wakefrequency 默认值 10000 即 10s，是HBase服务端线程唤醒时间间隔，用于log roller、memstore flusher等操作周期性检查；参数 hbase.server.compactchecker.interval.multiplier 默认值1000，是compaction操作周期性检查乘数因子。10 * 1000 s 时间上约等于2hrs, 46mins, 40sec。</li>
+<li>手动触发：是指通过HBase Shell、Master UI界面或者HBase API等任一种方式 执行 compact、major_compact等命令。</li>
+</ul>
+<h2 id="Hfile"><a href="#Hfile" class="headerlink" title="Hfile"></a>Hfile</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/c36qucns2zuqf6/article/details/80906270">https://blog.csdn.net/c36qucns2zuqf6/article/details/80906270</a></p>
+<blockquote>
+<p>hbase的row key + column family + column qualifier + timestamp + value 是HFile中数据排列依据。HFile据此，对数据的索引到data block级别，而不是行级别。所以这种key是HFile内部的粗粒度（data block粒度）本地索引的主键。</p>
+</blockquote>
+<h3 id="HFile-V1"><a href="#HFile-V1" class="headerlink" title="HFile V1"></a>HFile V1</h3><p>HFile V1的逻辑数据组织格式如下图，DataBlock区域、MetaBlock(bloomfilter) 与FileInfo、DataBlockIndex、MetaBlockIndex、Trailer分离。 HFileV1版本的在实际使用过程中发现它占用内存多，并且Bloom File和Block Index会变的很大，而引起启动时间变长。其中每个HFile的Bloom Filter可以增长到100MB，这在查询时会引起性能问题，因为每次查询时需要加载并查询Bloom Filter，100MB的Bloom Filer会引起很大的延迟；另一个，Block Index在一个HRegionServer可能会增长到总共6GB，HRegionServer在启动时需要先加载所有这些Block Index，因而增加了启动时间。为了解决这些问题，在0.92版本中引入HFileV2版本：</p>
+<p><img src="/images/2018081420173565" alt="img"></p>
+<h3 id="HFile-V2"><a href="#HFile-V2" class="headerlink" title="HFile V2"></a>HFile V2</h3><p><a target="_blank" rel="noopener" href="http://hbasefly.com/2016/03/25/hbase-hfile/">http://hbasefly.com/2016/03/25/hbase-hfile/</a></p>
+<h4 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h4><p>HFile V2的逻辑结构如下图所示：文件主要分为四个部分：Scanned block section，Non-scanned block section，Opening-time data section和Trailer。</p>
+<p>Scanned block section：表示顺序扫描HFile时（包含所有需要被读取的数据）所有的数据块将会被读取，包括Leaf Index Block和Bloom Block；</p>
+<p>Non-scanned block section：HFile顺序扫描的时候该部分数据不会被读取，主要包括Meta Block和Intermediate Level Data Index Blocks两部分；</p>
+<p>Load-on-open-section：这部分数据在HBase的region server启动时，需要加载到内存中。包括FileInfo、Bloom filter block、data block index和meta block index；</p>
+<p> Trailer：这部分主要记录了HFile的基本信息、各个部分的偏移值和寻址信息。</p>
+<p><img src="/images/2018081420173574" alt="img"></p>
+<p><strong>Hfile在读取的时候会首先解析Trailer Block并加载到内存，然后再加载LoadOnOpenSection区的数据</strong></p>
+<h4 id="物理结构"><a href="#物理结构" class="headerlink" title="物理结构"></a>物理结构</h4><p><img src="/images/image-20210109124820112.png" alt="image-20210109124820112"></p>
+<p>Hfile被分割成多个大小相等的Block，每个Block的大小可以在创建表的时候指定（blocksize ＝&gt; ‘65535’），默认是64K，较大的block有利于scan，较小的block有利于随机查询，每个block有相同的数据结构，Hbase将他们抽象为一个统一的HFileBlock</p>
+<blockquote>
+<p>HFileBlock支持两种类型，一种类型不支持checksum，一种不支持。为方便讲解，下图选用不支持checksum的HFileBlock内部结构：</p>
+</blockquote>
+<p><img src="/images/image-20210110195141829.png" alt="image-20210110195141829"></p>
+<p>HFileBl;ock包括两部分：BlockHeader和BlockData，其中BlockHeader存储Block元数据，BlockData存储数据</p>
+<p>Block元数据最核心的字段是BlockType字段，标识这个Block的类型，Hbase定义了8种Block的类型，每种BlockType对应的block都存储不同的数据内容，有的存储用户数据，有的存储索引数据，有的存储meta元数据。对于任意一种类型的HFileBlock，都拥有相同结构的BlockHeader，但是BlockData结构却不相同。下面通过一张表简单罗列最核心的几种BlockType，下文会详细针对每种BlockType进行详细的讲解：</p>
+<p><img src="/images/image-20210110195544456.png" alt="image-20210110195544456"></p>
+<h4 id="HFile中Block块解析"><a href="#HFile中Block块解析" class="headerlink" title="HFile中Block块解析"></a><strong>HFile中Block块解析</strong></h4><p>从HFile的层面将文件切分成了多种类型的block，接下来针对几种重要block进行详细的介绍，因为篇幅的原因，索引相关的block不会进行介绍</p>
+<p>首先会介绍记录HFile基本信息的TrailerBlock，再介绍用户数据的实际存储块DataBlock，最后简单介绍布隆过滤器相关的block</p>
+<h4 id="Trailer-Block"><a href="#Trailer-Block" class="headerlink" title="Trailer Block"></a><strong>Trailer Block</strong></h4><p>主要记录了HFile的基本信息、各部分的偏移值和寻址信息</p>
+<p><img src="/images/image-20210110195755570.png" alt="image-20210110195755570"></p>
+<p>HFile在读取的时候会首先解析Trailer Block并加载到内存，然后进一步加载LoadOnOpen区的数据</p>
+<p>具体是：</p>
+<ol>
+<li>首先加载version版本信息，HBase中version包含majorVersion和minorVersion两部分，前者决定了HFile的主版本： V1、V2 还是V3；后者在主版本确定的基础上决定是否支持一些微小修正，比如是否支持checksum等。不同的版本决定了使用不同的Reader对象对HFile进行读取解析</li>
+<li>根据Version获取Trailer的长度，再根据Version长度加载整个HFileTrailer Block</li>
+<li> 最后加载load-on-open部分到内存中，起始偏移地址是trailer中的LoadOnOpenDataOffset字段，load-on-open部分的结束偏移量为HFile长度减去Trailer长度，load-on-open部分主要包括索引树的根节点以及FileInfo两个重要模块，FileInfo是固定长度的块，它纪录了文件的一些Meta信息，例如：AVG_KEY_LEN, AVG_VALUE_LEN, LAST_KEY, COMPARATOR, MAX_SEQ_ID_KEY等；</li>
+</ol>
+<h4 id="Data-Block"><a href="#Data-Block" class="headerlink" title="Data Block"></a><strong>Data Block</strong></h4><p><strong>Data Block</strong>是Hbase中数据存储的最小单元，DataBlock主要存储用户的KeyValue数据（KeyValue后面一般会跟一个timestamp，图中未标出）</p>
+<p><img src="/images/image-20210110200530080.png" alt="image-20210110200530080"></p>
+<p>每个KeyValue都由4个部分构成，分别为key length，value length，key和value。其中key value和value length是两个固定长度的数值，而key是一个复杂的结构，首先是rowkey的长度，接着是rowkey，然后是ColumnFamily的长度，再是ColumnFamily，之后是ColumnQualifier，最后是时间戳和KeyType（keytype有四种类型，分别是Put、Delete、 DeleteColumn和DeleteFamily），value就没有那么复杂，就是一串纯粹的二进制数据。</p>
+<h4 id="BloomFilter-Meta-Block-amp-Bloom-Block"><a href="#BloomFilter-Meta-Block-amp-Bloom-Block" class="headerlink" title="BloomFilter Meta Block &amp; Bloom Block"></a><strong>BloomFilter Meta Block &amp; Bloom Block</strong></h4><blockquote>
+<p>BloomFilter对于HBase的随机读性能至关重要，对于get操作以及部分scan操作可以剔除掉不会用到的HFile文件，减少实际IO次数，提高随机读性能</p>
+</blockquote>
+<p>Bloom Filter使用位数组来实现过滤，初始状态下位数组每一位都为0，如下图所示：</p>
+<p><img src="/images/image-20210110201212219.png" alt="image-20210110201212219"></p>
+<h3 id="HFile-V3"><a href="#HFile-V3" class="headerlink" title="HFile V3"></a>HFile V3</h3><blockquote>
+<p>HFile V3版本基本和V2版本相同，只是在cell层面添加了Tag数组的支持</p>
+</blockquote>
+<p><img src="/images/20171112101735314" alt="img"></p>
+<p>HFile会被切分为多个大小相等的block，每一个block大小可以在创建表列簇的时候通过blockSize参数指定，默认是64K，较大的blockSize有利于scan，较小的有利于随机查询(get)；所有的block都有相同的数据结构，HBase将block块抽象成HFileBlock。HFileBlock支持2种类型：一种类型不支持checksum，一种不支持。我们选用不支持checksum的HFileBlock解释，下面是HFileBlock的内部结构：</p>
+<p><img src="/images/20171112101740941" alt="img"></p>
+<p>HFile在读取数据的时候，首先会解析Trailer Block，并加载到内存，然后再进一步加载Load-On-Open section的数据，具体步骤如下：</p>
+<ol>
+<li>首先加载HFile版本信息： HBase中version包含major version和minor version两部分，前者决定了HFile的主版本v1,v2 or v3，后者决定了在主版本的基础上是否支持一些微小的修正，比如是否支持checkum等。</li>
+<li>根据HFile版本信息，获取trailer的长度，因为版本的trailer长度或许不一样，然后再根据trailer长度加载整个HFile Trailer Block</li>
+<li>加载Load-On-Open section到内存，起始偏移量是trailer中记录的LoadOnOpenDataOffset，结束位置是HFile的length – trailer的length</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhanglh046/article/details/78510291">https://blog.csdn.net/zhanglh046/article/details/78510291</a></p>
+<h3 id="HFile索引机制"><a href="#HFile索引机制" class="headerlink" title="HFile索引机制"></a>HFile索引机制</h3><p><a target="_blank" rel="noopener" href="http://hbasefly.com/2016/04/03/hbase_hfile_index/">http://hbasefly.com/2016/04/03/hbase_hfile_index/</a></p>
+<p>Hfile有两种索引方式，single-level和mutil-level（根据层级分），前者表示单层索引，后者表示多层索引（一般是一级或者两级）</p>
+<p>HFile V1版本中只有single-level一种索引结构，V2版本中引入多级索引</p>
+<p><strong>之所以引入多级索引，是因为随着HFile文件越来越大，Data Block越来越多，索引数据也越来越大，已经无法全部加载到内存中（V1版本中一个Region Server的索引数据加载到内存会占用几乎6G空间），多级索引可以只加载部分索引，降低内存使用空间</strong>。</p>
+<p>Bloom Filter内存使用问题是促使V1版本升级到V2版本的一个原因，再加上这个原因，这两个原因就是V1版本升级到V2版本最重要的两个因素</p>
+<p>V2版本Index Block有两类：Root Index Block和NonRoot Index Block，其中NonRoot Index Block又分为Intermediate Index Block和Leaf Index Block两种。HFile中索引结构类似于一棵树，<strong>Root Index Block表示索引数根节点，Intermediate Index Block表示中间节点，Leaf Index block表示叶子节点，叶子节点直接指向实际数据块</strong></p>
+<blockquote>
+<p>Bloom Block也需要索引，索引结构实际上就是采用了single-level结构，文中Bloom Index Block就是一种Root Index Block</p>
+</blockquote>
+<p>对于Data Block，由于HFile刚开始数据量较小，索引采用single-level结构，只有Root Index一层索引，直接指向数据块。当数据量慢慢变大，Root Index Block满了之后，索引就会变为mutil-level结构，由一层索引变为两层，根节点指向叶子节点，叶子节点指向实际数据块。如果数据量再变大，索引层级就会变为三层</p>
+<h4 id="Root-Index-Block"><a href="#Root-Index-Block" class="headerlink" title="Root Index Block"></a><strong>Root Index Block</strong></h4><p>Root Index Block表示索引树根节点索引块，可以作为bloom的直接索引，也可以作为data索引的根索引。而且对于single-level和mutil-level两种索引结构对应的Root Index Block略有不同，这里以mutil-level索引结构为例进行分析（single-level索引结构是mutual-level的一种简化场景），在内存和磁盘中的格式如下图所示：</p>
+<p><img src="/images/image-20210110202836983.png" alt="image-20210110202836983"></p>
+<p>Index Entry表示具体的索引对象，每个索引对象由3个字段组成</p>
+<p>Block Offset表示索引指向数据块的偏移量</p>
+<p>BlockDataSize表示索引指向数据块在磁盘上的大小</p>
+<p>BlockKey表示索引指向数据块中的第一个key</p>
+<p>除此之外，还有另外3个字段用来记录MidKey的相关信息，MidKey表示HFile所有Data Block中中间的一个Data Block，用于在对HFile进行split操作时，快速定位HFile的中间位置。需要注意的是<strong>single-level索引结构和mutil-level结构相比，就只缺少MidKey这三个字段</strong></p>
+<p>Root Index Block会在HFile解析的时候直接加载到内存中，此处需要注意在Trailer Block中有一个字段为dataIndexCount，就表示此处Index Entry的个数。因为Index Entry并不定长，只有知道Entry的个数才能正确的将所有Index Entry加载到内存。</p>
+<h4 id="NonRoot-Index-Block"><a href="#NonRoot-Index-Block" class="headerlink" title="NonRoot Index Block"></a><strong>NonRoot Index Block</strong></h4><p>当HFile中Data Block越来越多，single-level结构的索引已经不足以支撑所有数据都加载到内存，需要进化成mutil-level结构</p>
+<p>mutil-level结构中NonRoot Index Block作为中间层节点或者叶子节点存在，无论是中间节点还是叶子节点，其都拥有相同的结构，如下图所示：</p>
+<p><img src="/images/image-20210111151657509.png" alt="image-20210111151657509"></p>
+<h4 id="索引流程"><a href="#索引流程" class="headerlink" title="索引流程"></a>索引流程</h4><p><img src="/images/image-20210111152152141.png" alt="image-20210111152152141"></p>
+<p>图中上面三层为索引层，在数据量不大的时候只有最上面一层，数据量大了之后开始分裂为多层，最多三层，如图所示。最下面一层为数据层，存储用户的实际keyvalue数据。这个索引树结构类似于InnoSQL的聚集索引，只是HBase并没有辅助索引的概念。</p>
+<p>图中红线表示一次查询的索引过程（HBase中相关类为HFileBlockIndex和HFileReaderV2），基本流程可以表示为：</p>
+<ol>
+<li>用户输入rowkey为fb，在root index block中通过二分查找定位到fb在’a’和’m’之间，因此需要访问索引’a’指向的中间节点。因为root index block常驻内存，所以这个过程很快。</li>
+<li>将索引’a’指向的中间节点索引块加载到内存，然后通过二分查找定位到fb在index  ‘d’和’h’之间，接下来访问索引’d’指向的叶子节点。</li>
+<li>同理，将索引’d’指向的中间节点索引块加载到内存，一样通过二分查找定位找到fb在index  ‘f’和’g’之间，最后需要访问索引’f’指向的数据块节点。</li>
+<li>将索引’f’指向的数据块加载到内存，通过遍历的方式找到对应的keyvalue。</li>
+</ol>
+<p>上述流程中因为中间节点、叶子节点和数据块都需要加载到内存，所以io次数正常为3次。但是实际上HBase为block提供了缓存机制，可以将频繁使用的block缓存在内存中，可以进一步加快实际读取过程。所以，在HBase中，通常一次随机读请求最多会产生3次io，如果数据量小（只有一层索引），数据已经缓存到了内存，就不会产生io。</p>
+<h3 id="Flush到Hfile"><a href="#Flush到Hfile" class="headerlink" title="Flush到Hfile"></a>Flush到Hfile</h3><h4 id="第一阶段"><a href="#第一阶段" class="headerlink" title="第一阶段"></a>第一阶段</h4><blockquote>
+<p>第一阶段生成内存快照</p>
+<p><a target="_blank" rel="noopener" href="http://hbasefly.com/2017/09/17/hbase-snapshot/">http://hbasefly.com/2017/09/17/hbase-snapshot/</a></p>
+</blockquote>
+<p>snapshot机制并不会拷贝数据，可以理解为它是原数据的一份指针。</p>
+<p>HBase数据文件一旦落到磁盘之后就不再允许更新删除等原地修改操作，如果想更新删除的话可以追加写入新文件（HBase中根本没有更新接口，删除命令也是追加写入）。<strong>这种机制下实现某个表的snapshot只需要给当前表的所有文件分别新建一个引用（指针），其他新写入的数据重新创建一个新文件写入即可</strong>。如下图所示：</p>
+<p><img src="/images/1.png" alt="1"></p>
+<blockquote>
+<p>snapshot不会真正拷贝数据，而是使用指针引用的方式创建一系列元数据。那元数据具体是什么样的元数据呢？实际上snapshot的整个流程基本如下：</p>
+</blockquote>
+<p><img src="/images/2.png" alt="2"></p>
+<p>snapshot流程主要涉及3个步骤：</p>
+<ol>
+<li>加一把全局锁，此时不允许任何的数据写入更新以及删除</li>
+<li>将Memstore中的缓存数据flush到文件中（可选）</li>
+<li>为所有HFile文件分别新建引用指针，这些指针元数据就是snapshot</li>
+</ol>
+<h4 id="第二阶段"><a href="#第二阶段" class="headerlink" title="第二阶段"></a>第二阶段</h4><p>memstore的flush有三个阶段，第一阶段生成内存快照，第二阶段将数据flush到Hfile，放在临时目录，第三阶段将临时目录移动到指定的ColumnFamily目录下，第二阶段的数据flush是整个流程的重点，而flush又分为两个阶段：</p>
+<ol>
+<li>append：memstore中key/value首先写入Hfile数据块</li>
+<li>finalize：修改Hfile中meta元数据块、索引数据及Trailer数据块</li>
+</ol>
+<h4 id="append"><a href="#append" class="headerlink" title="append"></a>append</h4><p><img src="/images/image-20210112205535652.png" alt="image-20210112205535652"></p>
+<ol>
+<li>预检查：检查key的大小是否大于前一个Key，如果大于，则不符合Habse排序原理，抛异常，如果value为null，抛异常</li>
+<li>block是否写满：检查当前Data block是否写满，如果没写满，直接写入，否则执行数据落盘及索引修改操作</li>
+<li>数据落盘并修改索引：如果Data Block写满，首先将block写入流，再生成一个leaf index entry，写入leaf Index Block；再检查该leaf index block是否已经写满需要落盘，如果已经写满，就将该leaf index block写入到输出流，并且为索引树根节点root index block新增一个索引，指向叶子节点(second-level index)</li>
+<li>生成一个新的block：重新reset输出流，初始化startOffset为-1</li>
+<li>写入key/value：将key/value以流的方式写入输出流，同时需要写入memstoreTS；除此之外，如果该key是当前block的第一个key，需要赋值给变量firstKeyInBlock</li>
+</ol>
+<h4 id="finalize"><a href="#finalize" class="headerlink" title="finalize"></a>finalize</h4><p>memstore中所有keyvalue都经过append阶段输出到HFile后，会执行一次finalize过程，主要更新HFile中meta元数据块、索引数据块以及Trailer数据块，其中对索引数据块的更新是我们关心的重点，此处详细解析，上述append流程中c步骤’数据落盘并修改索引’会使得root index block不断增多，当增大到一定程度之后就需要分裂，分裂示意图如下图所示：</p>
+<p><img src="/images/image-20210112210124029.png" alt="image-20210112210124029"></p>
+<h2 id="HBase行级事务模型"><a href="#HBase行级事务模型" class="headerlink" title="HBase行级事务模型"></a>HBase行级事务模型</h2><h3 id="HBase事务原子性保证"><a href="#HBase事务原子性保证" class="headerlink" title="HBase事务原子性保证"></a><strong>HBase事务原子性保证</strong></h3><p>HBase数据会首先写入WAL，再写入Memstore。写入Memstore异常很容易可以回滚，因此保证写入/更新原子性只需要保证写入WAL的原子性即可。</p>
+<ol>
+<li>HBase 0.98之前版本需要保证WAL写入的原子性并不容易，这由WAL的结构决定。假设一个行级事务更新R行中的3列（c1, c2, c3），来看看之前版本和当前版本的WAL结构：</li>
+</ol>
+<pre class="line-numbers language-none"><code class="language-none">&lt;logseq1-for-edit1&gt;:&lt;KeyValue-for-edit-c1&gt;
+&lt;logseq2-for-edit2&gt;:&lt;KeyValue-for-edit-c2&gt;
+&lt;logseq3-for-edit3&gt;:&lt;KeyValue-for-edit-c3&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<blockquote>
+<p><strong>每个KV都会形成一个WAL单元，这样一行事务更新多少列就会产生多少个WAL单元</strong>。在将这些WAL单元append到日志文件的时候，一旦出现宕机或其他异常，就会出现部分写入成功的情况，原子性更新就无法保证。</p>
+</blockquote>
+<ol start="2">
+<li>当前版本WAL结构：</li>
+</ol>
+<pre class="line-numbers language-none"><code class="language-none">&lt;logseq#-for-entire-txn&gt;:&lt;WALEdit-for-entire-txn&gt;
+&lt;logseq#-for-entire-txn&gt;:&lt;-1, 3, &lt;Keyvalue-for-edit-c1&gt;, &lt;KeyValue-for-edit-c2&gt;, &lt;KeyValue-for-edit-c3&gt;&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p><strong>通过这种结构，每个事务只会产生一个WAL单元。这样就可以保证WAL写入时候的原子性</strong></p>
+<h3 id="HBase事务隔离性"><a href="#HBase事务隔离性" class="headerlink" title="HBase事务隔离性"></a><strong>HBase事务隔离性</strong></h3><h4 id="实现写写并发控制"><a href="#实现写写并发控制" class="headerlink" title="实现写写并发控制"></a><strong>实现写写并发控制</strong></h4><p>实现写写并发其实很简单，只需要在写入（或更新）之前先获取行锁，如果获取不到，说明已经有其他线程拿了该锁，就需要不断重试等待或者自旋等待，直至其他线程释放该锁。</p>
+<p>拿到锁之后开始写入数据，写入完成之后释放行锁即可。这种行锁机制是实现写写并发控制最常用的手段，MySQL也是使用行锁来实现写写并发的。</p>
+<h4 id="实现批量写入多行的写写并发？"><a href="#实现批量写入多行的写写并发？" class="headerlink" title="实现批量写入多行的写写并发？"></a><strong>实现批量写入多行的写写并发？</strong></h4><p>HBase支持批量写入（或批量更新），即一个线程同时更新同一个Region中的多行记录。那如何保证当前事务中的批量写入与其他事务中的批量写入的并发控制呢？思路还是一样的，使用行锁。但这里需要注意的是必须使用<strong>两阶段锁协议</strong>，即：</p>
+<ol>
+<li>获取所有待写入（更新）行记录的行锁</li>
+<li>开始执行写入（更新）操作</li>
+<li>写入完成之后再统一释放所有行记录的行锁</li>
+</ol>
+<blockquote>
+<p>不能更新一行锁定（释放）一行，多个事务之间容易形成死锁。<strong>两阶段锁协议就是为了避免死锁，MySQL事务写写并发控制同样使用两阶段锁协议</strong></p>
+</blockquote>
+<h2 id="hbase和关系型数据库的区别"><a href="#hbase和关系型数据库的区别" class="headerlink" title="hbase和关系型数据库的区别"></a>hbase和关系型数据库的区别</h2><ol>
+<li>关系型数据库中数据以表的形式存在，采用关系模型，数据类型以及存储方式多样化，且操作复杂；<br>HBase以region形式存在，每个region中包含多个列族，将数据存储为未经解释的字符串，没有复杂的表间关系，<br>只有简单的添加查询等，不支持join操作</li>
+<li>存储模式：HBase基于列存储，每个列族由几个文件保存，不同列族分开保存</li>
+<li>数据索引：RDBMS针对不同列构建多个索引，HBase只有一个索引—-行键，所有访问都通过行键进行访问或扫描</li>
+</ol>
+<h1 id="Hbase优化"><a href="#Hbase优化" class="headerlink" title="Hbase优化"></a>Hbase优化</h1><h2 id="预分区"><a href="#预分区" class="headerlink" title="预分区"></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31289187/article/details/80869906?utm_medium=distribute.pc_relevant.none-task-blog-searchFromBaidu-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-searchFromBaidu-2.control">预分区</a></h2><p>HBase默认建表时有一个region，这个region的rowkey是没有边界的，即没有startkey和endkey，在数据写入时，所有数据都会写入这个默认的region，随着数据量的不断 增加，此region已经不能承受不断增长的数据量，会进行split，分成2个region。在此过程中，会产生两个问题：</p>
+<ol>
+<li>数据往一个region上写,会有写热点问题。</li>
+<li>region split会消耗宝贵的集群I/O资源。基于此我们可以控制在建表的时候，创建多个空region，并确定每个region的起始和终止rowky，这样只要我们的rowkey设计能均匀的命中各个region，就不会存在写热点问题。自然split的几率也会大大降低。当然随着数据量的不断增长，该split的还是要进行split。像这样预先创建hbase表分区的方式，称之为预分区，HBase提供了预分区功能，即用户可以在创建表的时候对表按照一定的规则分区</li>
+</ol>
+<p>减少由于region split带来的资源消耗。从而提高HBase的性能。</p>
+<pre class="line-numbers language-shell" data-language="shell"><code class="language-shell">create <span class="token string">'t1'</span>, <span class="token string">'f1'</span>, SPLITS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">'10'</span>, <span class="token string">'20'</span>, <span class="token string">'30'</span>, <span class="token string">'40'</span><span class="token punctuation">]</span> 
+create <span class="token string">'t1'</span>, <span class="token punctuation">&#123;</span>NAME <span class="token operator">=</span><span class="token operator">></span><span class="token string">'f1'</span>, TTL <span class="token operator">=</span><span class="token operator">></span> <span class="token number">180</span><span class="token punctuation">&#125;</span>, SPLITS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">'10'</span>, <span class="token string">'20'</span>, <span class="token string">'30'</span>, <span class="token string">'40'</span><span class="token punctuation">]</span> 
+create <span class="token string">'t1'</span>, <span class="token punctuation">&#123;</span>NAME <span class="token operator">=</span><span class="token operator">></span><span class="token string">'f1'</span>, TTL <span class="token operator">=</span><span class="token operator">></span> <span class="token number">180</span><span class="token punctuation">&#125;</span>, <span class="token punctuation">&#123;</span>NAME <span class="token operator">=</span><span class="token operator">></span> <span class="token string">'f2'</span>, TTL <span class="token operator">=</span><span class="token operator">></span> <span class="token number">240</span><span class="token punctuation">&#125;</span>, SPLITS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">'10'</span>, <span class="token string">'20'</span>, <span class="token string">'30'</span>, <span class="token string">'40'</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="设计RowKey"><a href="#设计RowKey" class="headerlink" title="设计RowKey"></a>设计RowKey</h2><blockquote>
+<p>设计原则   唯一性  散列性  长度原则</p>
+</blockquote>
+<p>hbase的内部使用KeyValue的形式存储，其key时rowKey：family：column：logTime，value是其存储的内容。</p>
+<p>其在region内大多以升序的形式排列，唯一的时logTime是以降序的形式进行排列。所以，rowKey里越靠近左边的信息越容易被检索到。其设计时，要考虑把重要的信息放左边，不重要的信息放到右边。这样可以提高查询数据的速度。最重要的提高索引速度的就是设计合适的rowKey。</p>
+<p>在做RowKey设计时，请先考虑业务是读比写多，还是读比写少，HBase本身是为写优化的，即便是这样，也可能会出现热点问题，而如果我们读比较多的话，除了考虑以上RowKey设计原则外，还可以考虑HBase的Coprocessor甚至elasticSearch结合的方法，无论哪种方式，都建议做实际业务场景下数据的压力测试以得到最优结果。</p>
+<h3 id="长度"><a href="#长度" class="headerlink" title="长度"></a>长度</h3><p>rowKey是一个二进制，RowKey的长度被很多开发者建议说设计在10~100个字节，以byte[]形式保存，最大不能超过64kb。建议越短越好，不要超过16个字节。</p>
+<p>太长的影响有几点点：</p>
+<ul>
+<li>一是HBase的持久化文件HFile是按照KeyValue存储的，如果RowKey过长，比如说500个字节，1000万列数据，光是RowKey就要占用500*1000万=50亿个字节，将近1G数据，极大影响了HFile的存储效率。</li>
+<li>二是缓存MemStore缓存部分数据到内存中，如果RowKey字段过长，内存的有效利用率会降低，系统无法缓存更多的数据，降低检索效率。</li>
+<li>目前操作系统都是64位系统，内存8字节对齐，控制在16字节，8字节的整数倍利用了操作系统的最佳特性。</li>
+</ul>
+<p>注意：不仅RowKey的长度是越短越好，而且列簇名、列名等尽量使用短名字，因为HBase属于列式数据库，这些名字都是会写入到HBase的持久化文件HFile中去，过长的RowKey、列簇、列名都会导致整体的存储量成倍增加。</p>
+<h3 id="散列"><a href="#散列" class="headerlink" title="散列"></a>散列</h3><p>设计的RowKey应均匀分布在各个HBase节点上。如RowKey是按系统时间戳的方式递增，RowKey的第一部分如果是时间戳的话，将造成所有新数据都在一个RegionServer堆积的热点现象，也就是通常说的Region热点问题，热点发生在大量的client直接访问集中在个别RegionServer上（访问可能是读、写或者其他操作），导致单个RegionServer机器自身负载过高，引起性能下降甚至Region不可用，常见的是发生jvm full gc或者显示region too busy异常情况。</p>
+<p>数据的集中性—-采用轮询方式取数据</p>
+<h3 id="Reverse反转"><a href="#Reverse反转" class="headerlink" title="Reverse反转"></a>Reverse反转</h3><p>针对固定长度的RowKey反转后存储，这样可以使RowKey中经常改变的部分放在最前面，可以有效的随机RowKey。反转RowKey的例子通常以手机举例，可以将手机号反转后的字符串作为RowKey，这样就避免了以手机号那样比较固定开头导致热点问题。这样做的缺点是牺牲了RowKey的有序性</p>
+<h3 id="分区键—字典序比较"><a href="#分区键—字典序比较" class="headerlink" title="分区键—字典序比较"></a>分区键—字典序比较</h3><p>startKey</p>
+<p>endKey</p>
+<p>“|”的值大于“_”，所以我们会在startkey和endkey后面追加“|”，这样就可以拼接rowkey使不同的数据落入设定的分区内部</p>
+<p>例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">0001|
+0002|
+0003|
+0004|
+0005|
+0006|
+0007|
+0008|
+0009|<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<blockquote>
+<p>在ASCII码中，”|”的值是124，大于所有的数字和字母等符号，当然也可以用“~”（ASCII-126）。分隔文件的第一行为第一个region的stopkey，每行依次类推，最后一行不仅是倒数第二个region的stopkey，同时也是最后一个region的startkey。也就是说分区文件中填的都是key取值范围的分隔点，如下图所示：</p>
+<p><img src="/images/20150605144842477" alt="img"></p>
+</blockquote>
+<h3 id="分区数目"><a href="#分区数目" class="headerlink" title="分区数目"></a>分区数目</h3><p>集群性能     数据大小</p>
+<h2 id="Hbase-高表和宽表"><a href="#Hbase-高表和宽表" class="headerlink" title="Hbase 高表和宽表"></a>Hbase 高表和宽表</h2><blockquote>
+<p>hbase中的宽表是指很多列较少行，即列多行少的表，一行中的数据量较大，行数少</p>
+<p>hbase中高表是指很多行较少列，即行多列少，一行中的数据量较少，行数多</p>
+</blockquote>
+<h3 id="高表"><a href="#高表" class="headerlink" title="高表"></a>高表</h3><p>rowKey信息多，查询性能好，并且高表的一行数据少，读缓存可存储的数据更多</p>
+<p>rowKey多会造成region多，元数据多</p>
+<p>建议将Hbase设计成高表，由于Hbase</p>
+<h3 id="宽表"><a href="#宽表" class="headerlink" title="宽表"></a>宽表</h3><p>Hbase支持行写入的事务原子性</p>
+<h1 id="opentsdb"><a href="#opentsdb" class="headerlink" title="opentsdb"></a>opentsdb</h1><p>待总结</p>
+<h1 id="面试"><a href="#面试" class="headerlink" title="面试"></a>面试</h1><h2 id="hbase为什么查询快（读写快）"><a href="#hbase为什么查询快（读写快）" class="headerlink" title="hbase为什么查询快（读写快）"></a>hbase为什么查询快（读写快）</h2><p>参考：<br>hbase是根据rowkey查询的，只要能快速的定位rowkey,  就能实现快速的查询</p>
+<p>读取速度快是因为它使用了LSM树型结构，而不是B或B+树。HBase读取首先会在缓存（BlockCache）中查找，它采用了LRU（最近最少使用算法），如果缓存中没找到，会从内存中的MemStore中查找，只有这两个地方都找不到时，才会加载HFile中的内容</p>
+<p>而读取HFile速度也会很快，因为节省了寻道开销 —-HBase会将数据保存到内存中，在内存中的数据是有序的，如果内存空间满了，会刷写到HFile中，顺序写入磁盘，读取的时候省去了大量磁盘寻址的时间</p>
+<p>HBase能提供实时计算服务主要原因是由其架构和底层的数据结构决定的，即由LSM-Tree(Log-Structured Merge-Tree) + HTable(region分区) + Cache决定——客户端可以直接定位到要查数据所在的HRegion server服务器，然后直接在服务器的一个region上查找要匹配的数据，并且这些数据部分是经过cache缓存的。</p>
+<p>LSM-tree： 是专门为 key-value 存储系统设计的，key-value 类型的存储系统最主要的就两个功能，put（k，v）：写入一个（k，v），get（k）：给定一个 k 查找 v。<br>LSM-tree 最大的特点就是写入速度快，主要利用了磁盘的顺序写，优于随机写入的 B-tree</p>
+<p><strong>读取速度快是因为它使用了LSM树型结构，而不是B或B+树。磁盘的顺序读取速度很快，但是相比而言，寻找磁道的速度就要慢很多。HBase的存储结构导致它需要磁盘寻道时间在可预测范围内，并且读取与所要查询的rowkey连续的任意数量的记录都不会引发额外的寻道开销。比如有5个存储文件，那么最多需要5次磁盘寻道就可以。而关系型数据库，即使有索引，也无法确定磁盘寻道次数。</strong></p>
+<p>hbase的实时查询：实时查询，可以认为是从内存中查询，一般响应时间在1秒内。<br>HBase的写入机制是数据先写入到内存中，当数据量达到一定的量（如128M），再写入磁盘中， 在内存中，是不进行数据的更新或合并操作的，只增加数据，这使得用户的写操作只要进入内存中就可以立即返回，保证了HBase I/O的高性能。</p>
+<h2 id="HBase为什么使用它？有什么优势？有什么缺点？从架构角度说说，相对于hadoop来说都是一个分布式存储工具，为什么读取速度比hadoop快那么多？"><a href="#HBase为什么使用它？有什么优势？有什么缺点？从架构角度说说，相对于hadoop来说都是一个分布式存储工具，为什么读取速度比hadoop快那么多？" class="headerlink" title="HBase为什么使用它？有什么优势？有什么缺点？从架构角度说说，相对于hadoop来说都是一个分布式存储工具，为什么读取速度比hadoop快那么多？"></a>HBase为什么使用它？有什么优势？有什么缺点？从架构角度说说，相对于hadoop来说都是一个分布式存储工具，为什么读取速度比hadoop快那么多？</h2><p>Hbase是构建在hdfs上的分布式的nosql数据库，能够支持海量数据的实时的随机读写，一张表可以支持数10亿行，数百万列<br>优点：PB级别数据支持，实时随机读写，可高并发操作，面向列<br>缺点：不支持sql，仅能使用一些较为简单的hbase shell，单一RowKey固有的局限性决定了它不可能有效地支持多条件查询<br>为什么hbase读取的速度很快？<br>主要是LSM-Tree(Log-Structured Merge-Tree) + HTable(region分区) + Cache决定——客户端可以直接定位到要查数据所在的HRegion server服务器，然后直接在服务器的一个region上查找要匹配的数据，并且这些数据部分是经过cache缓存的。<br>Hbase底层的存储引擎为LSM-Tree(Log-Structured Merge-Tree)。LSM树原理把一棵大树拆分成N棵小树，它首先写入内存中，随着小树越来越大，内存中的小树会flush到磁盘中，磁盘中的树定期可以做merge操作，合并成一棵大树，以优化读性能<br>读取速度快是因为它使用了LSM树型结构，而不是B或B+树。磁盘的顺序读取速度很快，但是相比而言，寻找磁道的速度就要慢很多。HBase的存储结构导致它需要磁盘寻道时间在可预测范围内，并且读取与所要查询的rowkey连续的任意数量的记录都不会引发额外的寻道开销。比如有5个存储文件，那么最多需要5次磁盘寻道就可以。而关系型数据库，即使有索引，也无法确定磁盘寻道次数。而且，HBase读取首先会在缓存（BlockCache）中查找，它采用了LRU（最近最少使用算法），如果缓存中没找到，会从内存中的MemStore中查找，只有这两个地方都找不到时，才会加载HFile中的内容，而上文也提到了读取HFile速度也会很快，因为节省了寻道开销。</p>
+<p>Hbase存储数据的过程：<br>参考：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9db975e817be">https://www.jianshu.com/p/9db975e817be</a><br>HBase会将数据保存到内存中，在内存中的数据是有序的，如果内存空间满了，会刷写到HFile中，而在HFile中保存的内容也是有序的。当数据写入HFile后，内存中的数据会被丢弃。<br>HFile文件为磁盘顺序读取做了优化，按页存储。下图展示了在内存中多个块存储并归并到磁盘的过程，合并写入会产生新的结果块，最终多个块被合并为更大块。<br>多次刷写后会产生很多小文件，后台线程会合并小文件组成大文件，这样磁盘查找会限制在少数几个数据存储文件中。HBase的写入速度快是因为它其实并不是真的立即写入文件中，而是先写入内存，随后异步刷入HFile。所以在客户端看来，写入速度很快。另外，写入时候将随机写入转换成顺序写，数据写入速度也很稳定。</p>
+<h2 id="HBase的表组织方式是什么？最小存储单元是什么？"><a href="#HBase的表组织方式是什么？最小存储单元是什么？" class="headerlink" title="HBase的表组织方式是什么？最小存储单元是什么？"></a>HBase的表组织方式是什么？最小存储单元是什么？</h2><p>表组织方式：行键、列族、列、时间戳</p>
+<p>最小存储单元是HFile，一个列族的所有列 存储在 同一个底层的存储文件中，这个存储文件叫做 HFile</p>
+<p>region: 以RowKey的起止区间为范围水平切分多个region，region由多个store组成，一个store对应管理一个列族。一个store对应一个memstore和多个storefile。storefile底层对应hfile</p>
+<p>region server: 一个region server就是一个存储数据的服务器节点，内部有自己管理的region，这些region是由hmaster给他分配的，负责相应客户端的读写请求</p>
+<p>memstore：用户写入的数据首先会放入MemStore，当MemStore满了以后会Flush成一个StoreFile。StoreFile文件数量增长到一定阈值，会触发Compact合并操作，将多个StoreFiles合并成一个StoreFile。单个StoreFile大小超过一定阈值后，会触发Split操作</p>
+<p>hmaster：监控RegionServer，并为其分配region，region分布调整，region分裂以及分裂后的region分配</p>
+<h2 id="LSM和B-树"><a href="#LSM和B-树" class="headerlink" title="LSM和B+树"></a>LSM和B+树</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/burningblade/p/14051747.html">https://www.cnblogs.com/burningblade/p/14051747.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/bonelee/p/6244810.html">https://www.cnblogs.com/bonelee/p/6244810.html</a></p>
+<p>现在假设有1000个节点的随机key，对于磁盘来说，肯定是把这1000个节点顺序写入磁盘最快，但是这样一来，读性能就会很低，因为key在磁盘中完全无序，每次读取都要全扫描；为了让读性能尽量高，数据在磁盘中必须得有序，这就是B+树的原理，但是写就悲剧了，因为会产生大量的随机IO，磁盘寻道速度跟不上。</p>
+<p>LSM树本质上就是在读写之间取得平衡，和B+树相比，<strong>它牺牲了部分读性能，用来大幅提高写性能</strong>。</p>
+<p>它的原理是把一颗大树拆分成N棵小树， 它首先写入到内存中（内存没有寻道速度的问题，随机写的性能得到大幅提升），在内存中构建一颗有序小树，随着小树越来越大，内存的小树会flush到磁盘上。当读时<strong>，由于不知道数据在哪棵小树上，因此必须遍历所有的小树，但在每颗小树内部数据是有序的</strong>。</p>
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><p>compact：小树合并为大树，因为小树的性能有问题，所以要有个进程不断地将小树合并到大树上，这样大部分的<strong>老数据</strong>查询也可以直接使用log2N的方式找到，不需要再进行(N/m)*log2n的查询了</p>
+<p>Bloom filter： 就是个带随即概率的bitmap，可以快速告诉你，某一个小的有序结构里有没有指定的那个数据的。于是就可以不用二分查找，而只需简单的计算几次就能知道数据是否在某个小集合里啦。效率得到了提升，但付出的是空间代价</p>
+<blockquote>
+<p>当写读比例很大的时候（写比读多），LSM树相比于B树有更好的性能。因为随着insert操作，为了维护B树结构，节点分裂。读磁盘的随机读写概率会变大，性能会逐渐减弱。 多次单页随机写，变成一次多页随机写，复用了磁盘寻道时间，极大提升效率。</p>
+</blockquote>
+<h2 id="hbase的memstore的flush触发条件"><a href="#hbase的memstore的flush触发条件" class="headerlink" title="hbase的memstore的flush触发条件"></a>hbase的memstore的flush触发条件</h2><blockquote>
+<p>MemStore的最小flush单元是HRegion而不是单个MemStore。如果一个HRegion中Memstore过多，每次flush的开销必然会很大，因此我们也建议在进行表设计的时候尽量减少ColumnFamily的个数。</p>
+</blockquote>
+<ol>
+<li>手动执行—–  flush ‘tablename’ 或者 flush ‘regionname’</li>
+<li>Memstore级别限制：当Region中任意一个MemStore的大小达到了上限（hbase.hregion.memstore.flush.size，默认128MB），会触发Memstore刷新。</li>
+<li>Region级别限制：当Region中所有Memstore的大小总和达到了上限（hbase.hregion.memstore.block.multiplier * *hbase.hregion.memstore.flush.size，默认 4 ** 128M = 512M），会触发memstore刷新。</li>
+<li>Region Server级别限制：当一个Region Server中所有Memstore的大小总和达到了上限（hbase.regionserver.global.memstore.upperLimit ＊ hbase_heapsize，默认 40%的JVM内存使用量），会触发部分Memstore刷新。Flush顺序是按照Memstore由大到小执行，先Flush Memstore最大的Region，再执行次大的，直至总体Memstore内存使用量低于阈值（hbase.regionserver.global.memstore.lowerLimit ＊ hbase_heapsize，默认 38%的JVM内存使用量）。（flush为空，执行RS级别检查）</li>
+<li>当一个Region Server中HLog数量达到上限（可通过参数hbase.regionserver.max.logs配置）时，系统会选取最早的一个 HLog对应的一个或多个Region进行flush。</li>
+<li>HBase定期刷新Memstore：默认周期为1小时，确保Memstore不会长时间没有持久化。为避免所有的MemStore在同一时间都进行flush导致的问题，定期的flush操作有20000左右的随机延时</li>
+</ol>
+<h2 id="flush流程"><a href="#flush流程" class="headerlink" title="flush流程"></a>flush流程</h2><ol>
+<li>prepare阶段：遍历当前Region中的所有Memstore，将Memstore中当前数据集kvset做一个快照snapshot，然后再新建一个新的kvset。后期的所有写入操作都会写入新的kvset中，而整个flush阶段读操作会首先分别遍历kvset和snapshot，如果查找不到再会到HFile中查找。prepare阶段需要加一把updateLock对写请求阻塞，结束之后会释放该锁。因为此阶段没有任何费时操作，因此持锁时间很短。</li>
+<li>flush阶段：遍历所有Memstore，将prepare阶段生成的snapshot持久化为临时文件，临时文件会统一放到目录.tmp下。这个过程因为涉及到磁盘IO操作，因此相对比较耗时。</li>
+<li>commit阶段：遍历所有的Memstore，将flush阶段生成的临时文件移到指定的ColumnFamily目录下，针对HFile生成对应的storefile和Reader，把storefile添加到HStore的storefiles列表中，最后再清空prepare阶段生成的snapshot。</li>
+</ol>
+<h2 id="hbase合并hfile的时机"><a href="#hbase合并hfile的时机" class="headerlink" title="hbase合并hfile的时机"></a>hbase合并hfile的时机</h2><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1488439">https://cloud.tencent.com/developer/article/1488439</a></p>
+<h2 id="column-family个数"><a href="#column-family个数" class="headerlink" title="column family个数"></a>column family个数</h2><p>当一个column family有大量数据时会触发整个region里面的其他column family的memstore（其实这些memstore可能仅有少量的数据，还不需要flush，并且Hdfs不适合存储小文件）发生flush；</p>
+<p>另外compaction触发的条件是当store file的个数（不是总的store file的大小）达到一定s数量的时候会发生，而flush产生的大量store file通常会导致compaction，flush/compaction会发生很多IO相关的负载，这对Hbase的整体性能有很大影响，所以选择合适的column family个数很重要</p>
+<h2 id="Hbase总结"><a href="#Hbase总结" class="headerlink" title="Hbase总结"></a><a target="_blank" rel="noopener" href="https://gaothink.top/2020/03/29/%E5%85%A8%E9%9D%A2%E5%9B%9E%E5%BF%86-%E3%80%8A%E5%85%A8%E9%9D%A2%E5%9B%9E%E5%BF%86%E3%80%8B%E4%B9%8B-%E2%80%94-HBase/">Hbase总结</a></h2><p>Hbase包含Hmaster负责表的创建、删除等操作，监控RegionServer的状态，负责RegionServer的状态转移，RegionServer对应一张表，负责region的切分和数据的更新查询等操作，region里面有store结构用于数据存储，分为MemStore（内存存储）和Hfile（磁盘存储），Hlog（RegionServer中只有一个）记录每一次数据操作，数据先写入到MemStore中，当达到一定阈值，就会flush到Hfile，Hfile会定期合并，当region比较大，regionServer会进行region切分（占用集群的IO资源）</p>
+<p>由于数据是先写到memstore中，所以hbase的写性能十分高，但正因为这个原因他的读性能相对基于B+树实现的mayql来说，要低一点</p>
+<p>由于之前说过数据是先写到Memstore中，当memstore满了以后才会刷写到磁盘，这样会产生很多文件，同时由于hbase的memstore实现的是lsm模型，他对每一次数据的增删改查都是记录操作，并没有更改数据，这样加快了写操作，但是正因为这样，导致他再不同时期刷写磁盘产生的文件都可能包含要查询的信息，最差的情况下会查询所有的Hfile来获取所有rowkey的记录</p>
+<p>虽然存在StoreFile合并，但是不同StoreFile包含一条数据的多次操作的可能性仍旧存在，所以他使用牺牲了部分读性能，提高了他的写性能</p>
+<h2 id="Hbase读写总结"><a href="#Hbase读写总结" class="headerlink" title="Hbase读写总结"></a>Hbase读写总结</h2><p>客户端读取Habse数据，会先连接zk，获取集群meta表在哪个regionserver，然后区读取meta表，获取要读取数据的位置，连接对应的regionserver，首先去BlockCache （读缓存）中查找，没有命中缓存，就去memstore写缓存中查找，都找不到，就使用BlockCache和布隆过滤器将Hfiles加载到内存，在Hfile中查找</p>
+<p>客户端写数据，也会连接zk，获取meta表位置，从mete表获取要写入表的位置，然后写入memstore，最后定期flush到Hfile，当Hfile过多会定期进行合并</p>
+<blockquote>
+<p>HBase只是增加数据，<strong>所有的更新和删除操作，都是在Compact阶段做的</strong>，所以用户写操作只需要进入到内存即可立即返回，从而保证I/O高性能读写</p>
+</blockquote>
+<h2 id="Hbase删除数据"><a href="#Hbase删除数据" class="headerlink" title="Hbase删除数据"></a>Hbase删除数据</h2><p>Hbase会给要删除的数据打上标签，只有在Major Compaction的时候，才会删除数据</p>
+<h2 id="Hbase过滤器"><a href="#Hbase过滤器" class="headerlink" title="Hbase过滤器"></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/changguolong/article/details/90740250">Hbase过滤器</a></h2><blockquote>
+<p>过滤器分为两大类:比较过滤器和专用过滤器</p>
+</blockquote>
+<h3 id="比较过滤器"><a href="#比较过滤器" class="headerlink" title="比较过滤器"></a>比较过滤器</h3><ul>
+<li><p>行键过滤器 <strong>RowFilter</strong>   </p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">Filter</span> filter1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RowFilter</span><span class="token punctuation">(</span><span class="token class-name">CompareOp</span><span class="token punctuation">.</span>LESS_OR_EQUAL<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">BinaryComparator</span><span class="token punctuation">(</span><span class="token class-name">Bytes</span><span class="token punctuation">.</span><span class="token function">toBytes</span><span class="token punctuation">(</span>“row<span class="token operator">-</span><span class="token number">22</span>”<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+scan<span class="token punctuation">.</span><span class="token function">setFilter</span><span class="token punctuation">(</span>filter1<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
+<li><p>列族过滤器<strong>FamilyFilter</strong></p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">Filter</span> filter1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">FamilyFilter</span><span class="token punctuation">(</span><span class="token class-name">CompareFilter<span class="token punctuation">.</span>CompareOp</span><span class="token punctuation">.</span>LESS<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">BinaryComparator</span><span class="token punctuation">(</span><span class="token class-name">Bytes</span><span class="token punctuation">.</span><span class="token function">toBytes</span><span class="token punctuation">(</span>“colfam3”<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+scan<span class="token punctuation">.</span><span class="token function">setFilter</span><span class="token punctuation">(</span>filter1<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
+<li><p>列过滤器<strong>QualifierFilter</strong></p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">Filter</span> filter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">QualifierFilter</span><span class="token punctuation">(</span><span class="token class-name">CompareFilter<span class="token punctuation">.</span>CompareOp</span><span class="token punctuation">.</span>LESS_OR_EQUAL<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">BinaryComparator</span><span class="token punctuation">(</span><span class="token class-name">Bytes</span><span class="token punctuation">.</span><span class="token function">toBytes</span><span class="token punctuation">(</span>“col<span class="token operator">-</span><span class="token number">2</span>”<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>值过滤器<strong>ValueFilter</strong></p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">Filter</span> filter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ValueFilter</span><span class="token punctuation">(</span><span class="token class-name">CompareFilter<span class="token punctuation">.</span>CompareOp</span><span class="token punctuation">.</span>EQUAL<span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">SubstringComparator</span><span class="token punctuation">(</span><span class="token string">".4"</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+</ul>
+<h3 id="专用过滤器"><a href="#专用过滤器" class="headerlink" title="专用过滤器"></a>专用过滤器</h3><p><strong>单列值过滤器 SingleColumnValueFilter —-会返回满足条件的整行</strong></p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name">SingleColumnValueFilter</span> filter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SingleColumnValueFilter</span><span class="token punctuation">(</span><span class="token class-name">Bytes</span><span class="token punctuation">.</span><span class="token function">toBytes</span><span class="token punctuation">(</span>“colfam1”<span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token class-name">Bytes</span><span class="token punctuation">.</span><span class="token function">toBytes</span><span class="token punctuation">(</span>“col<span class="token operator">-</span><span class="token number">5</span>”<span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token class-name">CompareFilter<span class="token punctuation">.</span>CompareOp</span><span class="token punctuation">.</span>NOT_EQUAL<span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">SubstringComparator</span><span class="token punctuation">(</span>“val<span class="token operator">-</span><span class="token number">5</span>”<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+filter<span class="token punctuation">.</span><span class="token function">setFilterIfMissing</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//如果不设置为 true，则那些不包含指定 column 的行也会返回</span>
+scan<span class="token punctuation">.</span><span class="token function">setFilter</span><span class="token punctuation">(</span>filter1<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<blockquote>
+<p>单列值排除器 SingleColumnValueExcludeFilter —–返回排除了该列的结果 与上面的结果相反</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">fuliangyu</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://fuliangyuzqm.github.io/2021/12/06/Hbase/">https://fuliangyuzqm.github.io/2021/12/06/Hbase/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">fuliangyu</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Hadoop/">
+                                    <span class="chip bg-color">Hadoop</span>
+                                </a>
+                            
+                                <a href="/tags/Hbase/">
+                                    <span class="chip bg-color">Hbase</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: '9UNGkr3Dp4FiRz1sqecibL8f-gzGzoHsz',
+        appKey: 'JxXPzxVqzEw4tHLe891YxU8o',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2021/12/07/%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2hexo/">
+                    <div class="card-image">
+                        
+                        <img src="/images/e713ed70-1.png" class="responsive-img" alt="自动化部署hexo">
+                        
+                        <span class="card-title">自动化部署hexo</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            自动化部署hexo到github
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2021-12-07
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/tool/" class="post-category">
+                                    tool
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/tool/">
+                        <span class="chip bg-color">tool</span>
+                    </a>
+                    
+                    <a href="/tags/Github/">
+                        <span class="chip bg-color">Github</span>
+                    </a>
+                    
+                    <a href="/tags/Hexo/">
+                        <span class="chip bg-color">Hexo</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2021/12/06/Hdfs/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="Hdfs">
+                        
+                        <span class="card-title">Hdfs</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Hdfs基础知识总结
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-12-06
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Hadoop/" class="post-category">
+                                    Hadoop
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Hdfs/">
+                        <span class="chip bg-color">Hdfs</span>
+                    </a>
+                    
+                    <a href="/tags/Hadoop/">
+                        <span class="chip bg-color">Hadoop</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+<script>
+    $('#articleContent').on('copy', function (e) {
+        // IE8 or earlier browser is 'undefined'
+        if (typeof window.getSelection === 'undefined') return;
+
+        var selection = window.getSelection();
+        // if the selection is short let's not annoy our users.
+        if (('' + selection).length < Number.parseInt('120')) {
+            return;
+        }
+
+        // create a div outside of the visible area and fill it with the selected text.
+        var bodyElement = document.getElementsByTagName('body')[0];
+        var newdiv = document.createElement('div');
+        newdiv.style.position = 'absolute';
+        newdiv.style.left = '-99999px';
+        bodyElement.appendChild(newdiv);
+        newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+        // we need a <pre> tag workaround.
+        // otherwise the text inside "pre" loses all the line breaks!
+        if (selection.getRangeAt(0).commonAncestorContainer.nodeName === 'PRE' || selection.getRangeAt(0).commonAncestorContainer.nodeName === 'CODE') {
+            newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+        }
+
+        var url = document.location.href;
+        newdiv.innerHTML += '<br />'
+            + '来源: fuliangyu<br />'
+            + '文章作者: fuliangyu<br />'
+            + '文章链接: <a href="' + url + '">' + url + '</a><br />'
+            + '本文章著作权归作者所有，任何形式的转载都请注明出处。';
+
+        selection.selectAllChildren(newdiv);
+        window.setTimeout(function () {bodyElement.removeChild(newdiv);}, 200);
+    });
+</script>
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h1,h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1,h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="/libs/aplayer/Meting.min.js"></script>
+
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2021-2022</span>
+            
+            <a href="/about" target="_blank">fuliangyu</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">134.7k</span>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2021";
+                        var startMonth = "12";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://fuliangyuzqm.github.io/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1719398791@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1719398791" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1719398791" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+    <script type="text/javascript" src="/libs/background/ribbon-dynamic.js" async="async"></script>
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<!-- hexo injector body_end start --><script data-pjax>function history_calendar_injector_config(){
+                var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+                var item_html = '<div class="card-widget card-history"><div class="card-content"><div class="item-headline"><i class="fas fa-clock fa-spin"></i><span>那年今日</span></div><div id="history-baidu" style="height: 100px;overflow: hidden"><div class="history_swiper-container" id="history-container" style="width: 100%;height: 100%"><div class="swiper-wrapper" id="history_container_wrapper" style="height:20px"></div></div></div></div>';
+                console.log('已挂载history_calendar')
+                // parent_div_git.innerHTML=item_html+parent_div_git.innerHTML // 无报错，但不影响使用(支持pjax跳转)
+                parent_div_git.insertAdjacentHTML("afterbegin",item_html) // 有报错，但不影响使用(支持pjax跳转)
+            }if( document.getElementsByClassName('sticky_layout')[0] && (location.pathname ==='all'|| 'all' ==='all')){
+
+            history_calendar_injector_config()
+        } </script><script data-pjax  src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script><script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-card-history/baiduhistory/js/main.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginModelPath":"assets/","model":{"scale":1,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":300,"height":500,"hOffset":30,"vOffset":-10},"mobile":{"show":false},"react":{"opacity":1},"log":false,"pluginJsPath":"lib/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>
